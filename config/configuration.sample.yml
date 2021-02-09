@@ -103,6 +103,12 @@ main:
         swftools_timeout: 60
         unoconv_timeout: 60
         exiftool_timeout: 60
+    task-manager:
+        status: started
+        listener:
+            protocol: tcp
+            host: 127.0.0.1
+            port: 6700
     storage:
         subdefs: null
         cache: null
@@ -285,7 +291,7 @@ video-editor:
     playbackRates:
         - 1
         - '1.5'
-        - 3       
+        - 3
 geocoding-providers:
     -
         map-provider: mapboxWebGL
@@ -354,3 +360,9 @@ user_account:
         email_confirmation: true
 
 Console_logger_enabled_environments: [test]
+registry:
+    actions:
+        export-stamp-choice: false
+        download-link-validity: 24
+    web-applications:
+        email-optional-for-login: false

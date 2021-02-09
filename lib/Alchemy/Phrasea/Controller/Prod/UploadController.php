@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of Phraseanet
  *
@@ -7,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Alchemy\Phrasea\Controller\Prod;
 
 use Alchemy\Phrasea\Application\Helper\BorderManagerAware;
@@ -33,8 +35,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class UploadController extends Controller
-{
+class UploadController extends Controller {
+
+
+
     use BorderManagerAware;
     use DataboxLoggerAware;
     use DispatcherAware;
@@ -42,39 +46,119 @@ class UploadController extends Controller
     use FilesystemAware;
     use SubDefinitionSubstituerAware;
 
-    public function getFlashUploadForm()
-    {
-        $maxFileSize = $this->getUploadMaxFileSize();
+    public function getFlashUploadForm() {
+	$maxFileSize = $this->getUploadMaxFileSize();
 
-        return $this->render('prod/upload/upload-flash.html.twig', [
-            'sessionId'           => session_id(),
-            'collections'         => $this->getGrantedCollections($this->getAclForUser()),
-            'maxFileSize'         => $maxFileSize,
-            'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
-        ]);
+	return $this->render('prod/upload/upload-flash.html.twig', [
+		    'sessionId' => session_id(),
+		    'collections' => $this->getGrantedCollections($this->getAclForUser()),
+		    'maxFileSize' => $maxFileSize,
+		    'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
+	]);
     }
 
-    public function getHtml5UploadForm()
-    {
-        $maxFileSize = $this->getUploadMaxFileSize();
+    /**
+     * Get POST max file size
+     *
+     * @return integer
+     */
+    private function getUploadMaxFileSize() {
+	$postMaxSize = trim(ini_get('post_max_size'));
 
-        return $this->render('prod/upload/upload.html.twig', [
-            'sessionId'           => session_id(),
-            'collections'         => $this->getGrantedCollections($this->getAclForUser()),
-            'maxFileSize'         => $maxFileSize,
-            'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
-        ]);
+	if ('' === $postMaxSize) {
+	    $postMaxSize = PHP_INT_MAX;
+	}
+
+	switch (strtolower(substr($postMaxSize, -1))) {
+	    /** @noinspection PhpMissingBreakStatementInspection */
+	    case 'g':
+		$postMaxSize *= 1024;
+	    /** @noinspection PhpMissingBreakStatementInspection */
+	    case 'm':
+		$postMaxSize *= 1024;
+	    case 'k':
+		$postMaxSize *= 1024;
+	}
+
+	return min(UploadedFile::getMaxFilesize(), (int) $postMaxSize);
     }
 
-    public function getUploadForm()
-    {
-        $maxFileSize = $this->getUploadMaxFileSize();
+    /**
+     * Get current user's granted collections where he can upload
+     *
+     * @param \ACL $acl The user's ACL.
+     *
+     * @return array
+     */
+    private function getGrantedCollections(\ACL $acl) {
+	$collections = [];
 
-        return $this->render('prod/upload/upload.html.twig', [
-            'collections'         => $this->getGrantedCollections($this->getAclForUser()),
-            'maxFileSize'         => $maxFileSize,
-            'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
-        ]);
+	foreach ($acl->get_granted_sbas() as $databox) {
+	    $sbasId = $databox->get_sbas_id();
+
+	    foreach ($acl->get_granted_base([\ACL::CANADDRECORD], [$sbasId]) as $collection) {
+		$databox = $collection->get_databox();
+
+		if (!isset($collections[$sbasId])) {
+		    $collections[$databox->get_sbas_id()] = [
+			'databox' => $databox,
+			'databox_collections' => []
+		    ];
+		}
+		$collections[$databox->get_sbas_id()]['databox_collections'][] = $collection;
+
+		/** @var DisplaySettingService $settings */
+		$settings = $this->app['settings'];
+		$userOrderSetting = $settings->getUserSetting($this->app->getAuthenticatedUser(), 'order_collection_by');
+
+		// a temporary array to sort the collections
+		$aName = [];
+		list($ukey, $uorder) = ["order", SORT_ASC];     // default ORDER_BY_ADMIN
+		switch ($userOrderSetting) {
+		    case $settings::ORDER_ALPHA_ASC :
+			list($ukey, $uorder) = ["name", SORT_ASC];
+			break;
+
+		    case $settings::ORDER_ALPHA_DESC :
+			list($ukey, $uorder) = ["name", SORT_DESC];
+			break;
+		}
+
+		foreach ($collections[$databox->get_sbas_id()]['databox_collections'] as $key => $row) {
+		    if ($ukey == "order") {
+			$aName[$key] = $row->get_ord();
+		    } else {
+			$aName[$key] = $row->get_name();
+		    }
+		}
+
+		// sort the collections
+		array_multisort($aName, $uorder, SORT_REGULAR, $collections[$databox->get_sbas_id()]['databox_collections']);
+	    }
+	}
+
+	return $collections;
+    }
+
+    public function getHtml5UploadForm() {
+	$maxFileSize = $this->getUploadMaxFileSize();
+
+	return $this->render('prod/upload/upload.html.twig', [
+		    'sessionId' => session_id(),
+		    'collections' => $this->getGrantedCollections($this->getAclForUser()),
+		    'maxFileSize' => $maxFileSize,
+		    'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
+	]);
+    }
+
+    public function getUploadForm() {
+	$maxFileSize = $this->getUploadMaxFileSize();
+
+	return $this->render('prod/upload/upload.html.twig', [
+		    'collections' => $this->getGrantedCollections($this->getAclForUser()),
+		    'maxFileSize' => $maxFileSize,
+		    'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
+	]);
     }
 
     public function getHead(Request $request)
@@ -140,16 +224,14 @@ class UploadController extends Controller
             throw new BadRequestHttpException('Missing base_id parameter');
         }
 
-        if (!$this->getAclForUser()->has_right_on_base($base_id, \ACL::CANADDRECORD)) {
-            throw new AccessDeniedHttpException('User is not allowed to add record on this collection');
-        }
+	if (null === $request->files->get('files')) {
+	    throw new BadRequestHttpException('Missing file parameter');
+	}
 
         /** @var UploadedFile $file */
         $file = current($request->files->get('files'));
 
-        if (!$file->isValid()) {
-            throw new BadRequestHttpException('Uploaded file is invalid');
-        }
+	$base_id = $request->request->get('base_id');
 
         if ($file->getClientOriginalName() === "blob" && $file->getClientMimeType() === "application/json") {
 
@@ -267,15 +349,11 @@ class UploadController extends Controller
                         $this->getDataboxLogger($elementCreated->getDatabox())
                             ->log($elementCreated, \Session_Logger::EVENT_SUBSTITUTE, 'thumbnail', '');
 
-                        unset($media);
-                        $this->getTemporaryFilesystem()->clean('base_64_thumb');
-                    } catch (DataUriException $e) {
+	$file = current($request->files->get('files'));
 
-                    }
-                }
-            } else {
-                /** @var LazaretFile $elementCreated */
-                $this->dispatch(PhraseaEvents::LAZARET_CREATE, new LazaretEvent($elementCreated));
+	if (!$file->isValid()) {
+	    throw new BadRequestHttpException('Uploaded file is invalid');
+	}
 
                 $id = $elementCreated->getId();
                 $element = 'lazaret';

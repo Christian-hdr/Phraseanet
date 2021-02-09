@@ -471,6 +471,22 @@ class QueryController extends Controller
     }
 
     /**
+     * @return DisplaySettingService
+     */
+    private function getSettings()
+    {
+        return $this->app['settings'];
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getUserManipulator()
+    {
+        return $this->app['manipulator.user'];
+    }
+
+    /**
      * Get a preview answer train
      *
      * @param  Request $request
@@ -501,21 +517,5 @@ class QueryController extends Controller
                 'selected' => $pos,
             ])
         ]);
-    }
-
-    /**
-     * @return DisplaySettingService
-     */
-    private function getSettings()
-    {
-        return $this->app['settings'];
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getUserManipulator()
-    {
-        return $this->app['manipulator.user'];
     }
 }

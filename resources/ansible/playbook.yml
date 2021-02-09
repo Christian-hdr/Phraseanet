@@ -12,6 +12,7 @@
     - elasticsearch
     - rabbitmq
     - php
+    - swftools
     - xdebug
     - composer
     - mailcatcher

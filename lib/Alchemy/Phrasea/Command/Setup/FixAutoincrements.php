@@ -377,4 +377,3 @@ class FixAutoincrements extends Command
     }
 
 }
-

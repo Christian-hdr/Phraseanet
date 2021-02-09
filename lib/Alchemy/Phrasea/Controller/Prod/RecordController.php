@@ -152,6 +152,21 @@ class RecordController extends Controller
         ]);
     }
 
+    public function getRecordById($sbasId, $recordId)
+    {
+        $record = new \record_adapter($this->app, $sbasId, $recordId);
+
+        return $this->app->json([
+                "html_preview"  => $this->render('common/preview.html.twig', [
+                    'record'        => $record
+                ]),
+                "desc"  => $this->render('common/caption.html.twig', [
+                    'record'        => $record,
+                    'view'          => 'preview'
+                ])
+        ]);
+    }
+
     /**
      * @param \record_preview $recordContainer
      * @return array
@@ -220,6 +235,8 @@ class RecordController extends Controller
         $StoryWZRepository = $this->getStoryWorkZoneRepository();
 
         $deleted = [];
+        /** @var \collection[] $trashCollectionsBySbasId */
+        $trashCollectionsBySbasId = [];
 
         /** @var \collection[] $trashCollectionsBySbasId */
         $trashCollectionsBySbasId = [];

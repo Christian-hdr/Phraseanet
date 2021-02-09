@@ -127,6 +127,8 @@ class RegistryFormManipulator
                 'enable-push-authentication' => false,
                 'force-push-authentication' => false,
                 'enable-feed-notification' => true,
+                'export-stamp-choice' => false,
+                'download-link-validity' => 0,
             ],
             'ftp'          => [
                 'ftp-enabled' => false,
@@ -163,7 +165,7 @@ class RegistryFormManipulator
                 'ffmpeg-threads' => 2,
                 'pdf-max-pages' => 5,
             ],
-            'searchengine' => [
+            'searchengine'     => [
                 'min-letters-truncation' => 1,
                 'default-query' => '',
                 'default-query-type' => 0,
@@ -191,5 +193,42 @@ class RegistryFormManipulator
                 ]
             ]
         ];
+    }
+
+    /**
+     * Gets the registry data given a submitted form.
+     * Default configuration is returned if no form provided.
+     *
+     * @param FormInterface $form
+     *
+     * @param PropertyAccess $conf
+     * @return array
+     */
+    public function getRegistryData(FormInterface $form = null, PropertyAccess $conf = null)
+    {
+        $data = [];
+
+        if (null !== $form) {
+            if (!$form->isSubmitted()) {
+                throw new RuntimeException('Form must have been submitted');
+            }
+            $newData = $form->getData();
+            $data = $this->filterNullValues($newData);
+        }
+
+        $currentConf = $conf ? ($conf->get('registry') ?: []) : [];
+
+        return array_replace_recursive($this->getDefaultData($currentConf), $data);
+    }
+
+    private function filterNullValues(array &$array)
+    {
+        return array_filter($array, function (&$value) {
+            if (is_array($value)) {
+                $value = $this->filterNullValues($value);
+            }
+
+            return null !== $value;
+        });
     }
 }

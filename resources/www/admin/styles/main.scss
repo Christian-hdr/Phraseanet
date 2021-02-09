@@ -7,11 +7,11 @@
 @import '../../_shared/styles/main';
 
 // override jquery ui theme colors:
-$uiTextContentColor: #333333;
-$uiTextTitleColor: #333333;
-$uiLinkColor: #333333;
-$uiLinkFocusColor: #333333;
-$uiLinkActiveColor: #333333;
+$uiTextContentColor: #12171d;
+$uiTextTitleColor: #12171d;
+$uiLinkColor: #12171d;
+$uiLinkFocusColor: #12171d;
+$uiLinkActiveColor: #12171d;
 $uiLinkBorderFocusColor: #c77405; //#333333;
 @import '../../_shared/styles/jquery-ui/ui-lightness';
 
@@ -19,10 +19,10 @@ $uiLinkBorderFocusColor: #c77405; //#333333;
 body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
+  background-color: #eeeff4;
   color: #333333;
   font-family: $defaultFontFamily;
-  font-size: $mediumFontSize;
+  font-size: 14px;
   overflow-y: auto;
 }
 

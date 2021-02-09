@@ -392,7 +392,7 @@
       </trans-unit>
       <trans-unit id="4412a659c3e1ca169796ab2f540a932ea7cbe2a4" resname="*Phraseanet Navigator* is a smartphone application that allow user to connect on this instance" approved="yes">
         <source>*Phraseanet Navigator* is a smartphone application that allow user to connect on this instance</source>
-        <target state="translated">*Phraseanet Navigator* est une application mobile permettant à des utilisateurs de se connecter sur cette instance Phraseanet.</target>
+        <target state="translated">*Gemnet Navigator* est une application mobile permettant à des utilisateurs de se connecter sur cette instance Gemnet.</target>
         <jms:reference-file line="28">Form/Configuration/APIClientsFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="356a192b7913b04c54574d18c28d46e6395428ab" resname="1" approved="yes">
@@ -509,7 +509,7 @@
       </trans-unit>
       <trans-unit id="1745c0ee532c1592e3751ef7ef48c382df74c457" resname="A third-party application is a product developed apart from Phraseanet and that would access Phraseanet data." approved="yes">
         <source>A third-party application is a product developed apart from Phraseanet and that would access Phraseanet data.</source>
-        <target state="translated">Une application tierce est un produit développé en dehors de Phraseanet et qui accède à des données Phraseanet.</target>
+        <target state="translated">Une application tierce est un produit développé en dehors de Gemnet et qui accède à des données Gemnet.</target>
         <jms:reference-file line="55">web/account/authorized_apps.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="342055b6954afaafc7585b0d8e5a0b59e400bea4" resname="A value does not match an expected format" approved="yes">
@@ -704,7 +704,7 @@
       </trans-unit>
       <trans-unit id="18a7d7025f09d8fd494b56d81e5208ec96510c99" resname="Add an admin" approved="yes">
         <source>Add an admin</source>
-        <target state="translated">Ajouter un administrateur Phraseanet</target>
+        <target state="translated">Ajouter un administrateur Gemnet</target>
         <jms:reference-file line="109">web/admin/dashboard.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="c67e5003ccafc3da11bb6a633844ddac62f79fed" resname="Add an end point" approved="yes">
@@ -899,7 +899,7 @@
       </trans-unit>
       <trans-unit id="c264a7efdbe0e0af2a6fe69e2bc9a89b90c5ec0e" resname="Allowed to access report" approved="yes">
         <source>Allowed to access report</source>
-        <target state="translated">Autoriser à consulter Phraseanet Report</target>
+        <target state="translated">Autoriser à consulter Gemnet Report</target>
         <jms:reference-file line="387">web/admin/editusers.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="a79a26fd0d867d56e440db7970bedeb81120db5e" resname="Allowed to add" approved="yes">
@@ -1110,7 +1110,7 @@
       </trans-unit>
       <trans-unit id="ee3ac8b2def14068e5827dcd2499e831cb89712c" resname="Application title" approved="yes">
         <source>Application title</source>
-        <target state="translated">Titre donné à l'instance Phraseanet</target>
+        <target state="translated">Titre donné à l'instance Gemnet</target>
         <jms:reference-file line="30">Form/Configuration/GeneralFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="866fef154cc77e6c30d7c9e97387dae0fb72dd08" resname="Application web" approved="yes">
@@ -1343,7 +1343,7 @@
       </trans-unit>
       <trans-unit id="d5f364d5d9a0a95fdba37f29a65a9ba61d6329ef" resname="Authorize *Phraseanet Navigator*" approved="yes">
         <source>Authorize *Phraseanet Navigator*</source>
-        <target state="translated">OBSOLETE Autoriser *Phraseanet Navigator*</target>
+        <target state="translated">OBSOLETE Autoriser *Gemnet Navigator*</target>
         <jms:reference-file line="27">Form/Configuration/APIClientsFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="b85de40822e66ce4309b94ccad5bb731f2a89373" resname="Authorize Adobe cc Plugin to connect." approved="yes">
@@ -1515,7 +1515,7 @@
       </trans-unit>
       <trans-unit id="375d9298999fbe406983b3c1beb73b2f6b1cd830" resname="Bonjour, vous etes sur le point d'installer Phraseanet." approved="yes">
         <source>Bonjour, vous etes sur le point d'installer Phraseanet.</source>
-        <target state="translated">Bonjour, vous êtes sur le point d'installer Phraseanet.</target>
+        <target state="translated">Bonjour, vous êtes sur le point d'installer Gemnet.</target>
         <jms:reference-file line="308">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="fe4c7f5c4c2bce6a7c44ea7406a0f3a83d0e21d1" resname="Bridge upload fail" approved="yes">
@@ -2121,7 +2121,7 @@
       </trans-unit>
       <trans-unit id="27c26eb5f5ded79caa39c9dd44376bf3556f6466" resname="Creez une application pour commencer a utiliser l'API Phraseanet" approved="yes">
         <source>Creez une application pour commencer a utiliser l'API Phraseanet</source>
-        <target state="translated">Créer une application pour commencer à utiliser l'API Phraseanet</target>
+        <target state="translated">Créer une application pour commencer à utiliser l'API Gemnet</target>
         <jms:reference-file line="62">web/developers/applications.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="dd6a02a553da4cb247f914011dd67c37487ec082" resname="Ctrl" approved="yes">
@@ -2420,7 +2420,7 @@
       </trans-unit>
       <trans-unit id="eedc3da946c6f6f8cca37df0edc42543d09e1464" resname="Demarrer avec l'API Phraseanet" approved="yes">
         <source>Demarrer avec l'API Phraseanet</source>
-        <target state="translated">Démarrer avec l'API Phraseanet</target>
+        <target state="translated">Démarrer avec l'API Gemnet</target>
         <jms:reference-file line="58">web/developers/applications.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="53577bb5df0ee9b6376e87f4896b6957a25d7a43" resname="Deny" approved="yes">
@@ -2556,7 +2556,7 @@
       </trans-unit>
       <trans-unit id="9a4f75566de9f7c0e2887b1868620d6432dbb767" resname="Do you authorize the application %application_name% to access to your Phraseanet content?" approved="yes">
         <source>Do you authorize the application %application_name% to access to your Phraseanet content?</source>
-        <target state="translated">Autoriser l'application %application_name% à accéder à des contenus Phraseanet ?</target>
+        <target state="translated">Autoriser l'application %application_name% à accéder à des contenus Gemnet ?</target>
         <jms:reference-file line="28">login/oauth/authorize-access.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="9909deb7fb0b9534e6638819716369823768cc87" resname="Do you really want to delete the field %s ?" approved="yes">
@@ -3498,7 +3498,7 @@
       </trans-unit>
       <trans-unit id="ee485ef50d127d2c51fe0091051d8c390d03ed59" resname="Gives the option to your application to communicate with Phraseanet. This webhook can be used to trigger some actions on your application side." approved="yes">
         <source>Gives the option to your application to communicate with Phraseanet. This webhook can be used to trigger some actions on your application side.</source>
-        <target state="translated">Donne la possibilité à votre application de communiquer avec Phraseanet. Ce Webhook peut être utilisé pour déclencher des actions sur l'application distante.</target>
+        <target state="translated">Donne la possibilité à votre application de communiquer avec Gemnet. Ce Webhook peut être utilisé pour déclencher des actions sur l'application distante.</target>
         <jms:reference-file line="85">web/developers/application.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="f9b0c22e143c938fbb3b27bcb023c4b1b7fcaa85" resname="Go 1 frame backward" approved="yes">
@@ -3860,7 +3860,7 @@
       </trans-unit>
       <trans-unit id="3067f6d77794b736024c9a5594c1823612581e07" resname="It is not recommended to install Phraseanet without HTTPS support" approved="yes">
         <source>It is not recommended to install Phraseanet without HTTPS support</source>
-        <target state="translated">Il n'est pas recommandé d'installer Phraseanet sans protocole HTTPS</target>
+        <target state="translated">Il n'est pas recommandé d'installer Gemnet sans protocole HTTPS</target>
         <jms:reference-file line="76">Phrasea/Controller/SetupController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="feed3517f845bc792002627ad5585e4a70fb952b" resname="It stores users datas, rights, and references to DataBoxes where records are stored." approved="yes">
@@ -4331,7 +4331,7 @@
       </trans-unit>
       <trans-unit id="cbcbdf92e7a47c81ec1719f03f00d8e6c5b5f5ef" resname="Message automatique de Phraseanet" approved="yes">
         <source>Message automatique de Phraseanet</source>
-        <target state="translated">Message automatique de Phraseanet</target>
+        <target state="translated">Message automatique de Gemnet</target>
         <jms:reference-file line="134">templates/web/email-template.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="3f17a172513ae816fbe5f183f85cd0c465de0860" resname="Mettre a jour" approved="yes">
@@ -4734,7 +4734,7 @@
       </trans-unit>
       <trans-unit id="18ee7ad22bf04f818fd95599481303c7f7d1b29f" resname="Notify third party application when an event occurs in Phraseanet" approved="yes">
         <source>Notify third party application when an event occurs in Phraseanet</source>
-        <target state="translated">Notifier l'application tierce lorsqu'un événement se produit dans Phraseanet</target>
+        <target state="translated">Notifier l'application tierce lorsqu'un événement se produit dans Gemnet</target>
         <jms:reference-file line="74">TaskManager/Job/WebhookJob.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="3ccc3824ae2ffdfea7482564cbc8cf35de78766d" resname="Notify users about this publication" approved="yes">
@@ -5003,32 +5003,32 @@
       </trans-unit>
       <trans-unit id="6cc2304a4cac479507c6278fa9cbdb90ca26f568" resname="Phraseanet DataBoxes are MySQL databases, queryable by Phraseanet ApplicationBox." approved="yes">
         <source>Phraseanet DataBoxes are MySQL databases, queryable by Phraseanet ApplicationBox.</source>
-        <target state="translated">Les Databoxes Phraseanet sont des bases de données MySQL, requêtables par l'ApplicationBox Phraseanet.</target>
+        <target state="translated">Les Databoxes Gemnet sont des bases de données MySQL, requêtables par l'ApplicationBox Gemnet.</target>
         <jms:reference-file line="853">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="5690614063267463abafaad1a8ba1514ba101b99" resname="Phraseanet client API" approved="yes">
         <source>Phraseanet client API</source>
-        <target state="translated">API cliente Phraseanet</target>
+        <target state="translated">API cliente Gemnet</target>
         <jms:reference-file line="52">Form/Configuration/MainConfigurationFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="f143f17807f67cfc6047a85c0df963d3b553770a" resname="Phraseanet embarque un moteur de taches pour la lecture / ecriture des metadonnes, et autre operations" approved="yes">
         <source>Phraseanet embarque un moteur de taches pour la lecture / ecriture des metadonnes, et autre operations</source>
-        <target state="translated">Phraseanet embarque un moteur de tâches pour la lecture et l'écriture des métadonnées, la réalisation d'autres opérations</target>
+        <target state="translated">Gemnet embarque un moteur de tâches pour la lecture et l'écriture des métadonnées, la réalisation d'autres opérations</target>
         <jms:reference-file line="819">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="17d47194ec888edc3eb2a8f200f0400f787924ff" resname="Phraseanet guest-access is disabled" approved="yes">
         <source>Phraseanet guest-access is disabled</source>
-        <target state="translated">L'accès invité de Phraseanet est désactivé.</target>
+        <target state="translated">L'accès invité de Gemnet est désactivé.</target>
         <jms:reference-file line="546">Controller/Root/LoginController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="f76e81b1e826c0255a8e7e2b0e9c8f6c33bba34c" resname="Phraseanet may require many binaries." approved="yes">
         <source>Phraseanet may require many binaries.</source>
-        <target state="translated">Phraseanet peut utiliser de nombreux éxécutables</target>
+        <target state="translated">Gemnet peut utiliser de nombreux éxécutables</target>
         <jms:reference-file line="408">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="a5c95af56dfec6e64a39eff10ce40614ec46030c" resname="Phraseanet strongly recommends the use of %link_start%MariaDB%link_end% as a replacement for MySQL." approved="yes">
         <source>Phraseanet strongly recommends the use of %link_start%MariaDB%link_end% as a replacement for MySQL.</source>
-        <target state="translated">Phraseanet recommande fortement l'utilisation de %link_start%MariaDB%link_end% à la place de MySQL.</target>
+        <target state="translated">Gemnet recommande fortement l'utilisation de %link_start%MariaDB%link_end% à la place de MySQL.</target>
         <jms:reference-file line="612">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="5d12bd53552cafc41ca6146c04870df2e1574e13" resname="Play" approved="yes">
@@ -5323,13 +5323,13 @@
       <trans-unit id="dcf907ccbbcda0c0a828ef73ff1e6320748c1fad" resname="Push::une validation est une demande d'appreciation a d'autres personnes" approved="yes">
         <source>Push::une validation est une demande d'appreciation a d'autres personnes</source>
         <target state="translated">La validation permet d'adresser des demandes d'appréciation de documents auprès d'utilisateurs.
-Ils recevront un e-mail contenant un lien lançant Phraseanet Lightbox. Cette interface les autorise à visualiser, télécharger, et à émettre des avis et commentaires sur le contenu diffusé.
+Ils recevront un e-mail contenant un lien lançant Gemnet Lightbox. Cette interface les autorise à visualiser, télécharger, et à émettre des avis et commentaires sur le contenu diffusé.
 Pour les utilisateurs authentifiés, la demande de validation est également disponible sous la forme d'un panier reçu dans la zone de travail.</target>
         <jms:reference-file line="189">prod/actions/Push.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="3e45857148ed08b19a425b5f4a2775e30dd346a7" resname="Push::unpush permet d'envoyer un lot d'image a des destinataires" approved="yes">
         <source>Push::unpush permet d'envoyer un lot d'image a des destinataires</source>
-        <target state="translated">Le Push permet d'adresser des documents à des utilisateurs. Ils recevront un e-mail contenant un lien lançant Phraseanet Lightbox. Cette interface les autorise à visualiser et à télécharger le contenu diffusé. Pour les utilisateurs authentifiés, un Push est également disponible sous la forme d'un panier reçu dans la zone de travail.</target>
+        <target state="translated">Le Push permet d'adresser des documents à des utilisateurs. Ils recevront un e-mail contenant un lien lançant Gemnet Lightbox. Cette interface les autorise à visualiser et à télécharger le contenu diffusé. Pour les utilisateurs authentifiés, un Push est également disponible sous la forme d'un panier reçu dans la zone de travail.</target>
         <jms:reference-file line="187">prod/actions/Push.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="a60f2c73604f623449f263e78f5857849ad5e429" resname="Quality" approved="yes">
@@ -5709,7 +5709,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="ee45c30326b750387589752c0f75e1dd87ddc7e4" resname="Report" approved="yes">
         <source>Report</source>
-        <target state="translated">Afficher dans Phraseanet Report</target>
+        <target state="translated">Afficher dans Gemnet Report</target>
         <jms:reference-file line="220">admin/fields/templates.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="859ca6c24228b6fe9c9010bed75d2933884d7b49" resname="Request access" approved="yes">
@@ -6620,7 +6620,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="903b3a1a72b51b7b51f85ec8c81def53ed9c9b0c" resname="The Phraseanet Web API allows other web application to rely on this instance" approved="yes">
         <source>The Phraseanet Web API allows other web application to rely on this instance</source>
-        <target state="translated">L'API Web Phraseanet permet à d'autres applications web de se reposer sur cette instance</target>
+        <target state="translated">L'API Web Gemnet permet à d'autres applications web de se reposer sur cette instance</target>
         <jms:reference-file line="23">Form/Configuration/APIClientsFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="2558cc2c887bbe4e2444ec6ef83b4982386e871a" resname="The URL you used is out of date, please login" approved="yes">
@@ -7015,7 +7015,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="d32751443628a0d2c5b31b441c1e2b3001f35dfd" resname="Unable to add file to Phraseanet" approved="yes">
         <source>Unable to add file to Phraseanet</source>
-        <target state="translated">Impossible d'ajouter des fichiers à Phraseanet</target>
+        <target state="translated">Impossible d'ajouter des fichiers à Gemnet</target>
         <jms:reference-file line="294">Controller/Prod/UploadController.php</jms:reference-file>
         <jms:reference-file line="195">Controller/Admin/FeedController.php</jms:reference-file>
       </trans-unit>
@@ -7224,7 +7224,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="74126bf38974fc3d5bf2d0844567be2be473e122" resname="Use my Phraseanet account" approved="yes">
         <source>Use my Phraseanet account</source>
-        <target state="translated">Utiliser mon compte Phraseanet</target>
+        <target state="translated">Utiliser mon compte Gemnet</target>
         <jms:reference-file line="106">login/providers/mapping.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="c42cc91c040b3c093f851494375a1be868018231" resname="Use recaptcha API" approved="yes">
@@ -7920,7 +7920,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="dad67eb2125fe612c37ae8195438f7ff834a7bb3" resname="Your %provider_name% account matchs a Phraseanet account" approved="yes">
         <source>Your %provider_name% account matchs a Phraseanet account</source>
-        <target state="translated">Votre compte %provider_name% correspond à un compte Phraseanet.</target>
+        <target state="translated">Votre compte %provider_name% correspond à un compte Gemnet.</target>
         <jms:reference-file line="19">login/providers/mapping.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="37247cfed1c419a5dfff77cac1e5698ea4002ae5" resname="Your access on %application%" approved="yes">
@@ -7991,7 +7991,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="bd5a589e9bed2de0b0180ca950ea0593249f7f69" resname="Your phraseanet account on %urlInstance% has been deleted!" approved="yes">
         <source>Your phraseanet account on %urlInstance% has been deleted!</source>
-        <target state="translated">Votre compte Phraseanet sur %urlInstance% a été supprimé!</target>
+        <target state="translated">Votre compte Gemnet sur %urlInstance% a été supprimé!</target>
         <jms:reference-file line="29">Notification/Mail/MailSuccessAccountDelete.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="257253d658fdcbe73c4f4d02d2a3442ea8e4011d" resname="Your registration requests have been taken into account." approved="yes">
@@ -8155,7 +8155,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="ec54407a03c3b0693732fbfaa4fc8b38cc76acc8" resname="admin:: Phraseanet service setting (beta)" approved="yes">
         <source>admin:: Phraseanet service setting (beta)</source>
-        <target state="translated">Réglages Phraseanet-Service (beta)</target>
+        <target state="translated">Réglages Gemnet-Service (beta)</target>
         <jms:reference-file line="28">web/admin/tree.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="21a0648a0d5db7740c7ed2ff84041aeb87c8224a" resname="admin:: appliquer le modele" approved="yes">
@@ -9441,7 +9441,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="aad9c7bfbd4ec6c06db323888012969d0c2d7497" resname="admin:phrasea-service-setting:tab-title:: Page title" approved="yes">
         <source>admin:phrasea-service-setting:tab-title:: Page title</source>
-        <target state="translated">Réglage de Phraseanet-Service</target>
+        <target state="translated">Réglage de Gemnet-Service</target>
         <jms:reference-file line="1">admin/phraseanet-service/index.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="a985de2a62972487e307b2e0d4a41daea2f472ee" resname="admin:phrasea-service-setting:tab:: Auth" approved="yes">
@@ -9476,7 +9476,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="3b9e1dc275aa08a09aea57ea597dcd2c468de030" resname="admin:phrasea-service-setting:tab:expose:: Add mapping" approved="yes">
         <source>admin:phrasea-service-setting:tab:expose:: Add mapping</source>
-        <target state="translated">Ajouter un mapping Phraseanet pour les assets et la fiche d'indexation</target>
+        <target state="translated">Ajouter un mapping Gemnet pour les assets et la fiche d'indexation</target>
         <jms:reference-file line="57">admin/phraseanet-service/expose.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="d44ff57d4e838e5e2132b8d4391f10cba90bfa08" resname="admin:phrasea-service-setting:tab:expose:: Add user" approved="yes">
@@ -9556,7 +9556,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="4a38d5696dfefd2a5ceef56fc39dcb1a078bd8f5" resname="admin:phrasea-service-setting:tab:expose:: add Mapping" approved="yes">
         <source>admin:phrasea-service-setting:tab:expose:: add Mapping</source>
-        <target state="translated">Ajouter un mapping Phraseanet pour les assets et les champs de description</target>
+        <target state="translated">Ajouter un mapping Gemnet pour les assets et les champs de description</target>
         <jms:reference-file line="55">admin/phraseanet-service/expose.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="22f2e8cc325cfde8357fe7d66502a79257b173a9" resname="admin:phrasea-service-setting:tab:expose:: add user" approved="yes">
@@ -11522,7 +11522,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="8d168955d9cfb26df27fbdcb4f83bbfe78654703" resname="phraseanet::account: My phraseanet account" approved="yes">
         <source>phraseanet::account: My phraseanet account</source>
-        <target state="translated">Mon compte Phraseanet</target>
+        <target state="translated">Mon compte Gemnet</target>
         <jms:reference-file line="267">web/account/account.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="9628f29074afd5c9bb42bb0b4c896f8bc32c192e" resname="phraseanet::chargement" approved="yes">
@@ -11535,7 +11535,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="70c4053d038cd11fa8fcb91bf79e580b89fad194" resname="phraseanet::erreur: La connection au serveur Phraseanet semble etre indisponible" approved="yes">
         <source>phraseanet::erreur: La connection au serveur Phraseanet semble etre indisponible</source>
-        <target state="translated">La connexion au serveur Phraseanet semble être indisponible.</target>
+        <target state="translated">La connexion au serveur Gemnet semble être indisponible.</target>
         <jms:reference-file line="36">Controller/Prod/LanguageController.php</jms:reference-file>
         <jms:reference-file line="41">web/admin/index.html.twig</jms:reference-file>
       </trans-unit>
@@ -12023,7 +12023,7 @@ Attention: les valeurs actuellement en place seront écrasées par ces nouvelles
       <trans-unit id="f5b80c50fa70208435fd889b73915ca753efabd3" resname="prod::editing::annulation: abandonner les modification ?" approved="yes">
         <source>prod::editing::annulation: abandonner les modification ?</source>
         <target state="translated">L'annulation de l'édition effacera toutes les modifications.
- - Annuler: pour revenir à l'édition 
+ - Annuler: pour revenir à l'édition
  - OK: pour fermer et perdre les modifications</target>
         <jms:reference-file line="46">Controller/Prod/LanguageController.php</jms:reference-file>
       </trans-unit>
@@ -13176,7 +13176,7 @@ Attention: les valeurs actuellement en place seront écrasées par ces nouvelles
       </trans-unit>
       <trans-unit id="d61b0b1a419a5b37db8576e1072307a5503dba79" resname="report:: Phraseanet report" approved="yes">
         <source>report:: Phraseanet report</source>
-        <target state="translated">Phraseanet Report</target>
+        <target state="translated">Gemnet Report</target>
         <jms:reference-file line="6">web/report/report_layout.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="a5c2d01ec9cd2716cb44a02ba1851d82de40aa8a" resname="report:: Plateforme" approved="yes">

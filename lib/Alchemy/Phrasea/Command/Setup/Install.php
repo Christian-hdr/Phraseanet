@@ -21,6 +21,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\ExecutableFinder;
+use Symfony\Component\VarDumper\VarDumper;
 
 class Install extends Command
 {
@@ -101,8 +102,8 @@ class Install extends Command
 |  Hello !                                       |      |             |
 |                                                |      |             |
 |  You are on your way to install Phraseanet,    |     ,';\".________.-.
-|  You will need access to 2 MySQL databases.    |     ;';_'         )]
-|                                                |    ;             `-|
+|  You will need access to 2 MySQL databases     |     ;';_'         )]
+|  and an ElasticSearch server.                  |    ;             `-|
 |                                                `.    `T-            |
  `----------------------------------------------._ \    |             |
                                                   `-;   |             |
@@ -149,6 +150,21 @@ class Install extends Command
         $esOptions = ElasticsearchOptions::fromArray([
             'host'  => $esHost,
             'port'  => $esPort,
+            'index' => $esIndexName
+        ]);
+
+        $output->writeln('');
+
+        if (! $input->getOption('yes')) {
+            $output->writeln("\n<info>--- ElasticSearch connection settings ---</info>\n");
+        }
+
+        list($esHost, $esPort) = $this->getESHost($input, $output, $dialog);
+        $esIndexName = $this->getESIndexName($input, $output, $dialog);
+
+        $esOptions = ElasticsearchOptions::fromArray([
+            'host' => $esHost,
+            'port' => $esPort,
             'index' => $esIndexName
         ]);
 

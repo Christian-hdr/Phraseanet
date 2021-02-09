@@ -50,7 +50,17 @@ class ComposerInstaller
             ->getProcess();
 
         try {
-            $process->run();
+            $prefix = PHP_EOL . ' >> ';
+
+            $process->run(function ($type, $bytes) use ($verbose, & $prefix) {
+                if ($verbose && $type == 'err') {
+                    echo $prefix . str_replace(PHP_EOL, PHP_EOL . ' >> ', $bytes);
+
+                    $prefix = '';
+                }
+            });
+
+            echo PHP_EOL;
         } catch (ProcessException $e) {
             throw new ComposerInstallException(sprintf('Unable to composer install %s', $directory), $e->getCode(), $e);
         }

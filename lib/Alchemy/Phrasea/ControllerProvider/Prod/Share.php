@@ -68,4 +68,5 @@ class Share implements ControllerProviderInterface, ServiceProviderInterface
 
         return $controllers;
     }
+
 }

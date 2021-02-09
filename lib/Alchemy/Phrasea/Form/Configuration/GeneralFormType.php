@@ -52,7 +52,6 @@ class GeneralFormType extends AbstractType
             'choices'       => [
                 'DISPLAYx1' => 'Single image',
                 'SCROLL'    => 'Slide show',
-                'COOLIRIS'  => 'Cooliris',
                 'CAROUSEL'  => 'Carousel',
                 'GALLERIA'  => 'Gallery',
             ],

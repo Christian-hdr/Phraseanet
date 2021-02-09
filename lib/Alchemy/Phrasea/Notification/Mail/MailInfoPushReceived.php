@@ -46,7 +46,7 @@ class MailInfoPushReceived extends AbstractMailWithLink
             throw new LogicException('You must set a basket before calling getSubject');
         }
 
-        return $this->app->trans('Reception of %basket_name%', ['%basket_name%' => $this->basket->getName()]);
+        return $this->app->trans('%basket_name%', ['%basket_name%' => $this->basket->getName()]);
     }
 
     /**

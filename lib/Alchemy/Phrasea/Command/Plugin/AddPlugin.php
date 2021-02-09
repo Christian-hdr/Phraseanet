@@ -18,12 +18,12 @@ use Symfony\Component\Console\Input\ArrayInput;
 
 class AddPlugin extends AbstractPluginCommand
 {
-    public function __construct()
+    public function __construct($invoker = 'console')
     {
         parent::__construct('plugins:add');
 
         $this
-            ->setDescription('Installs a plugin to Phraseanet')
+            ->setDescription("Installs a plugin to Phraseanet {$this->showDeprecatedMessage($invoker,'plugins:add')}")
             ->addArgument('source', InputArgument::REQUIRED, 'The source is a folder');
     }
 

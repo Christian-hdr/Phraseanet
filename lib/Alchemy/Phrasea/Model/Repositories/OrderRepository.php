@@ -130,6 +130,71 @@ class OrderRepository extends EntityRepository
         }
     }
 
+    public function performQuery($qb, $baseIds, $filters) {
+        if (!empty($baseIds)) {
+            $qb
+                ->innerJoin('o.elements', 'e')
+                ->where($qb->expr()->in('e.baseId', $baseIds));
+            if ($filters['todo'] == Order::STATUS_TODO) {
+                $qb
+                    ->andWhere('o.todo != 0');
+            }elseif ($filters['todo'] == Order::STATUS_PROCESSED) {
+                $qb
+                    ->andWhere('o.todo = 0');
+            }
+
+            $createdOn = '';
+            switch ($filters['created_on']) {
+                case Order::STATUS_CURRENT_WEEK:    //this week
+                    $time = strtotime(date("Y-m-d 00:00:00"));
+                    //check if today is monday
+                    if (date('D', $time) == 'Mon') {
+                        $weekStartDate = date('Y-m-d', strtotime("Monday", $time));
+                    }
+                    else {
+                        $weekStartDate = date('Y-m-d', strtotime("last Monday", $time));
+                    }
+                    $createdOn = $weekStartDate;
+                    $qb->andWhere("o.createdOn >= '" . $createdOn . "'");
+                    break;
+
+                case Order::STATUS_PAST_WEEK:    //last week
+                    $time = strtotime('last week');
+                    $lastWeekStartDate = date('Y-m-d',strtotime("Monday", $time));
+                    $createdOn = $lastWeekStartDate;
+                    $qb->andWhere("o.createdOn >= '" . $createdOn . "'");
+                    break;
+
+                case Order::STATUS_PAST_MONTH:    //last month
+                    $lastMonthStartDate = date("Y-m-d", strtotime("first day of previous month"));
+                    $createdOn = $lastMonthStartDate;
+                    $qb->andWhere("o.createdOn >= '" . $createdOn . "'");
+                    break;
+
+                case Order::STATUS_BEFORE:    //before specific date
+                    if(isset($filters['limit']['date'])) {
+                        $createdOn = date('Y-m-d', strtotime($filters['limit']['date']));
+                        $qb->andWhere("o.createdOn < '" . $createdOn . "'");
+                    }
+                    break;
+
+                case Order::STATUS_AFTER:    //before specific date
+                    if(isset($filters['limit']['date'])) {
+                        $createdOn = date('Y-m-d', strtotime($filters['limit']['date']));
+                        $qb->andWhere("o.createdOn > '" . $createdOn . "'");
+                    }
+                    break;
+
+                case Order::STATUS_NO_FILTER:
+                    //no filtering by date
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
     /**
      * Returns the total number of orders from an array of base_id and filters
      *

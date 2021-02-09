@@ -180,6 +180,9 @@ class ExportController extends Controller
         // add PREG_SPLIT_NO_EMPTY to only return non-empty values
         $list['email'] = implode(',', preg_split($separator, $request->request->get("taglistdestmail", ""), -1, PREG_SPLIT_NO_EMPTY));
 
+        $separator = '/\ |\;|\,/';
+        // add PREG_SPLIT_NO_EMPTY to only return non-empty values
+        $list['email'] = implode(';', preg_split($separator, $request->request->get("destmail", ""), -1, PREG_SPLIT_NO_EMPTY));
         $destMails = [];
         //get destination mails
         foreach (explode(",", $list['email']) as $mail) {
@@ -195,7 +198,6 @@ class ExportController extends Controller
                 ));
             }
         }
-
         $token = $this->getTokenManipulator()->createEmailExportToken(serialize($list));
 
         if (count($destMails) > 0) {

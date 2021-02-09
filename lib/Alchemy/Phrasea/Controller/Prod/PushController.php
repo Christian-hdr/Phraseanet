@@ -92,6 +92,7 @@ class PushController extends Controller
             $push_description = $request->request->get('push_description');
 
             $receivers = $request->request->get('participants');
+	    $mess = $request->request->get('message');
 
             if (!is_array($receivers) || empty($receivers)) {
                 throw new ControllerException($this->app->trans('No receivers specified'));
@@ -118,6 +119,7 @@ class PushController extends Controller
                 $Basket->setUser($user_receiver);
                 $Basket->setPusher($this->getAuthenticatedUser());
                 $Basket->markUnread();
+		$Basket->setMess($mess);
 
                 $manager->persist($Basket);
 
@@ -231,7 +233,8 @@ class PushController extends Controller
                 'Validation from %user%', [
                 '%user%' => $this->getAuthenticatedUser()->getDisplayName(),
             ]));
-            $validation_description = $request->request->get('message');
+            $validation_description = $request->request->get('validation_description');
+	    $mess = $request->request->get('message');
 
             $participants = $request->request->get('participants');
 
@@ -247,14 +250,16 @@ class PushController extends Controller
             //
             if ($pusher->is_basket()) {
                 $basket = $pusher->get_original_basket();
-            }
-            else {
-                // ...so if we got a list of elements (records), we create a basket for those
+		$basket->setMess($mess);
+                $manager->persist($basket);
+		$manager->flush();
+            } else {
                 $basket = new Basket();
                 $basket->setName($validation_name);
                 $basket->setDescription($validation_description);
                 $basket->setUser($this->getAuthenticatedUser());
                 $basket->markUnread();
+		$basket->setMess($mess);
 
                 $manager->persist($basket);
 

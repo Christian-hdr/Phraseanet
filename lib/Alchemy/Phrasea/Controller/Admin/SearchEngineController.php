@@ -61,28 +61,34 @@ class SearchEngineController extends Controller
     public function dropIndexAction(Request $request)
     {
         $indexer = $this->app['elasticsearch.indexer'];
+
         if ($indexer->indexExists()) {
             $indexer->deleteIndex();
         }
+
         return $this->app->redirectPath('admin_searchengine_form');
     }
 
     public function createIndexAction(Request $request)
     {
         $indexer = $this->app['elasticsearch.indexer'];
+
         if (!$indexer->indexExists()) {
             $indexer->createIndex();
         }
+
         return $this->app->redirectPath('admin_searchengine_form');
     }
 
     /**
-     * @return ElasticsearchOptions
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    private function getElasticsearchOptions()
+    public function getSettingFromIndexAction(Request $request)
     {
-        return $this->app['elasticsearch.options'];
-    }
+        if (!$request->isXmlHttpRequest()) {
+            $this->app->abort(400);
+        }
 
     /**
      * @param ElasticsearchOptions $configuration

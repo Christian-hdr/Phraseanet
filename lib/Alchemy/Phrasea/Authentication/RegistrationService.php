@@ -289,9 +289,8 @@ class RegistrationService
      * @param array $selectedCollections
      * @return \collection[]
      */
-    private function getAuthorizedCollections(array $selectedCollections = null)
+    private function getAuthorizedCollections($selectedCollections, $inscriptions)
     {
-        $inscriptions = $this->registrationManager->getRegistrationSummary();
         $authorizedCollections = [];
 
         foreach ($this->appbox->get_databoxes() as $databox) {

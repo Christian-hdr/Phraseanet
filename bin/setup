@@ -11,6 +11,7 @@
 
 namespace KonsoleKommander;
 
+use Alchemy\Phrasea\Command\Setup\FixAutoincrements;
 use Alchemy\Phrasea\Command\Setup\ConfigurationEditor;
 use Alchemy\Phrasea\Command\Setup\FixAutoincrements;
 use Alchemy\Phrasea\Command\Setup\FixLogCollId;

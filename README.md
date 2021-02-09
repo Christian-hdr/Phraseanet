@@ -35,7 +35,7 @@ And follow the install steps described at https://docs.phraseanet.com/4.0/en/Adm
 - docker-compose >=v1.25.4
 - docker >=v18.01-ce
 
-Note about elasticsearch container 
+Note about elasticsearch container
 Check this link
 https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-prod-prerequisites
 
@@ -119,11 +119,11 @@ PHRASEANET_DOCKER_REGISTRY=alchemyfr
 # Tag of the Docker images
 PHRASEANET_DOCKER_TAG=
 ```
-or 
+or
 
 Pull images before launch docker-compose
 
-#### Tag organisation on docker hub 
+#### Tag organisation on docker hub
 
 ```latest``` : latest stable version
 
@@ -243,5 +243,4 @@ Ex:
 - vagrant up --provision  //// 5.6 ///// 1  >> Build the alchemy/phraseanet-php-5.6 box
 
 
-
-
+travis [![Build Status](https://secure.travis-ci.org/alchemy-fr/Phraseanet.png?branch=master)](http://travis-ci.org/alchemy-fr/Phraseanet)

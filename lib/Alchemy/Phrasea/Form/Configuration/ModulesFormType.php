@@ -34,6 +34,9 @@ class ModulesFormType extends AbstractType
             'label'        => 'Anonymous report',
             'help_message' => 'Hide information about users',
         ]);
+		$builder->add('notif-upload', 'checkbox', [
+            'label'         => "Notification à l'upload",
+        ]);
     }
 
     public function getName()

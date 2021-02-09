@@ -307,6 +307,7 @@
                                          title="{{ 'action:: nouveau reportage' | trans }}"/>
                                     <span>{{ 'action:: nouveau reportage' | trans }}</span>
                                 </a>
+                                <div class="divider"></div>
                             </div>
                        {% endif %}
                     </li>
@@ -465,14 +466,41 @@
                                                         {% set isSelected = (sortByPreference == constant('\\Alchemy\\Phrasea\\SearchEngine\\SearchEngineOptions::SORT_RELEVANCE')) %}
                                                         {% set isDefault = (sortByDefault == constant('\\Alchemy\\Phrasea\\SearchEngine\\SearchEngineOptions::SORT_RELEVANCE')) %}
                                                         <option value="{{ constant('\\Alchemy\\Phrasea\\SearchEngine\\SearchEngineOptions::SORT_RELEVANCE') }}" {% if isSelected %}selected="selected"{% endif %}{% if isDefault %} class="default-selection"{% endif %}>{{ "Relevance"|trans }}</option>
-                                                        <optgroup label="{{ 'By field'|trans }}">
-                                                        {% for fieldname, sort in search_datas['sort'] %}
-                                                            {% set b = (sortOrderPreference == fieldname) %}
+
+                                                        <optgroup label="{{ 'By string field'|trans }}">
+                                                        {% if(search_datas['sort'][constant('\\databox_field::TYPE_STRING')]|length) > 0 %}
+                                                            {% for fieldname, sort in search_datas['sort'][constant('\\databox_field::TYPE_STRING')] %}
+                                                                {% set b = (sortOrderPreference == fieldname) %}
                                                             <option value="{{ fieldname }}"
-                                                                    {% if b %}selected="selected"{% endif %}
-                                                                    class="{% if b %}default-selection {% endif %}dbx db_{{sort['sbas']|join(' db_')}}"
-                                                                    >{{ fieldname }}</option>
-                                                        {% endfor %}
+                                                                {% if b %}selected="selected"{% endif %}
+                                                                class="{% if b %}default-selection {% endif %}dbx db_{{sort['sbas']|join(' db_')}}"
+                                                            >{{ fieldname }}</option>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                        </optgroup>
+
+                                                        <optgroup label="{{ 'By date field'|trans }}">
+                                                            {% if(search_datas['sort'][constant('\\databox_field::TYPE_DATE')]|length) > 0 %}
+                                                                {% for fieldname, sort in search_datas['sort'][constant('\\databox_field::TYPE_DATE')] %}
+                                                                    {% set b = (sortOrderPreference == fieldname) %}
+                                                                    <option value="{{ fieldname }}"
+                                                                            {% if b %}selected="selected"{% endif %}
+                                                                            class="{% if b %}default-selection {% endif %}dbx db_{{sort['sbas']|join(' db_')}}"
+                                                                            >{{ fieldname }}</option>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </optgroup>
+
+                                                        <optgroup label="{{ 'By numeric field'|trans }}">
+                                                            {% if(search_datas['sort'][constant('\\databox_field::TYPE_NUMBER')]|length) > 0 %}
+                                                                {% for fieldname, sort in search_datas['sort'][constant('\\databox_field::TYPE_NUMBER')] %}
+                                                                    {% set b = (sortOrderPreference == fieldname) %}
+                                                                    <option value="{{ fieldname }}"
+                                                                            {% if b %}selected="selected"{% endif %}
+                                                                            class="{% if b %}default-selection {% endif %}dbx db_{{sort['sbas']|join(' db_')}}"
+                                                                            >{{ fieldname }}</option>
+                                                                {% endfor %}
+                                                            {% endif %}
                                                         </optgroup>
                                                     </select>
                                                     <select name="ord" class="input-medium check-filters" data-save="true">
@@ -881,6 +909,27 @@
                             <input type="text" class="span4" name="start_page_value" value="{{ app['settings'].getUserSetting(app.getAuthenticatedUser(), 'start_page_query')}}" style="display:{% if start_page_pref == 'QUERY' %}inline{% else %}none{% endif %}" />
                             <input type="button" class="btn btn-inverse preferences-options-submit" value="{{'boutton::valider'  | trans }}" />
                         </form>
+                    </div>
+                    <div class="box">
+                        <h1>{{ 'Collection order' | trans }}</h1>
+                        <form class="form-inline">
+                            {% set order_collection_by = app['settings'].getUserSetting(app.getAuthenticatedUser(), 'order_collection_by') %}
+                            <label class="select" for="orderByName">
+                                <select onchange="setPref('order_collection_by',$(this).val());" name="orderByName">
+                                    <option {% if order_collection_by == constant('Alchemy\\Phrasea\\Core\\Configuration\\DisplaySettingService::ORDER_BY_ADMIN') %} selected="selected" {% endif %} value="{{ constant('Alchemy\\Phrasea\\Core\\Configuration\\DisplaySettingService::ORDER_BY_ADMIN') }}">{{ 'Defined by admin' | trans }}</option>
+                                    <option {% if order_collection_by == constant('Alchemy\\Phrasea\\Core\\Configuration\\DisplaySettingService::ORDER_ALPHA_ASC') %} selected="selected" {% endif %} value="{{ constant('Alchemy\\Phrasea\\Core\\Configuration\\DisplaySettingService::ORDER_ALPHA_ASC') }}">{{ 'Alphabetic asc' | trans }}</option>
+                                    <option {% if order_collection_by == constant('Alchemy\\Phrasea\\Core\\Configuration\\DisplaySettingService::ORDER_ALPHA_DESC') %} selected="selected" {% endif %} value="{{ constant('Alchemy\\Phrasea\\Core\\Configuration\\DisplaySettingService::ORDER_ALPHA_DESC') }}">{{ 'Alphabetic desc' | trans }}</option>
+                                </select>
+                            </label>
+                        </form>
+                    </div>
+                    <div class="box">
+                        <h1>{{ 'index::advance_search: facet' | trans }}</h1>
+                        {% set facetFilter = app['settings'].getUserSetting(app.getAuthenticatedUser(), 'facet') %}
+                        <label class="checkbox inline" for="ADVSRCH_FILTER_FACET" style="margin-bottom: 1em">
+                            <input onchange="setFacet($(this).prop('checked'))" id="ADVSRCH_FILTER_FACET" type="checkbox" name="filter_facet" {% if facetFilter == 'true' %}checked="checked"{% endif %}>
+                            {{ 'index::advance_search: disable-facet' | trans }}
+                        </label>
                     </div>
                 </div>
                 <div class="box">

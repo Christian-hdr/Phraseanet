@@ -73,7 +73,8 @@ var dialogModule = (function ($) {
                 confirmExit: false,
                 closeCallback: false,
                 closeButton: false,
-                cancelButton: false
+                cancelButton: false,
+		closeText: "close"
             },
             options = typeof options === 'object' ? options : {},
             width,
@@ -185,6 +186,7 @@ var dialogModule = (function ($) {
     _phraseaDialog.prototype = {
         close: function () {
             _dialog.close(this.level);
+			gotopage(1);
         },
         setContent: function (content) {
             this.$dialog.removeClass('loading').empty().append(content);

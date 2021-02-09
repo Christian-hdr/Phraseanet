@@ -11,6 +11,7 @@
 
 namespace Alchemy\Phrasea\Model\Manipulator;
 
+use Alchemy\Phrasea\Core\Configuration\PropertyAccess;
 use Alchemy\Phrasea\Model\Entities\Basket;
 use Alchemy\Phrasea\Model\Entities\FeedEntry;
 use Alchemy\Phrasea\Model\Entities\Token;
@@ -41,6 +42,7 @@ class TokenManipulator implements ManipulatorInterface
     private $om;
     private $random;
     private $repository;
+    private $conf;
 
     private $temporaryDownloadPath;
 
@@ -48,12 +50,14 @@ class TokenManipulator implements ManipulatorInterface
         ObjectManager $om,
         Generator $random,
         TokenRepository $repository,
-        $temporaryDownloadPath)
+        $temporaryDownloadPath,
+        PropertyAccess $configuration)
     {
         $this->om = $om;
         $this->random = $random;
         $this->repository = $repository;
         $this->temporaryDownloadPath = $temporaryDownloadPath;
+        $this->conf = $configuration;
     }
 
     /**

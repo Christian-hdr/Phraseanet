@@ -20,6 +20,7 @@ use Alchemy\Phrasea\Core\Configuration\HostConfiguration;
 use Alchemy\Phrasea\Core\Configuration\PropertyAccess;
 use Alchemy\Phrasea\Core\Configuration\Compiler;
 use Alchemy\Phrasea\Core\Configuration\RegistryManipulator;
+use Alchemy\Phrasea\Core\Configuration\StructureTemplate;
 use Alchemy\Phrasea\Core\Event\Subscriber\ConfigurationLoaderSubscriber;
 use Silex\Application as SilexApplication;
 use Silex\ServiceProviderInterface;
