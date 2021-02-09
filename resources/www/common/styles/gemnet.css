@@ -1,0 +1,225 @@
+/* prod */
+#mainMenu {
+    background-color: #12171d;
+}
+#mainMenu li a {
+    color:#fff;   
+}
+#mainMenu li a:hover {
+    color:#fff;   
+}
+#left span {
+    color:#fff;
+}
+
+.context-menu-item a {
+    color:#000;
+}
+.context-menu-item a img {
+    width: 25px;
+}
+
+.fixeddesc .dl-horizontal dd {
+    color:#000; 
+}
+.client_help {
+    color:#000; 
+}
+hr {
+    border-top: 1px solid #1b242b;
+    border-bottom: 1px solid #12171d;
+}
+.ui-dialog #searchForm .control-group label {
+	color:#fff;
+}
+.list_saver input[type=text] {
+    font-size: 10px;
+}
+/** diapo */
+.diapo.selected, #reorder_box .diapo.selected, #EDIT_ALL .diapo.selected, .list.selected, .list.selected .diapo {
+    background-color: #00b551;
+    border-color:transparent;
+    color:#fff;
+}
+.diapo .duration {
+    background-color: transparent;
+}
+.icon-stack [class^="icon-"], .icon-stack [class*=" icon-"] {
+    font-size:1.5em;
+}
+.context-menu-theme-vista .context-menu-item .context-menu-item-inner {
+    color:#000;
+}
+.popover .popover-content{
+    background-color: #1b242b;
+}
+#searchForm .control-group label {
+    color:#000;
+}
+/** menu gauche */
+#idFrameC .icon-menu .WZbasketTab {
+    background-position: 9px 22px;
+}
+
+/** bar de recherche */
+.btn.btn-inverse {
+    color:#fff;
+}
+/** menu droit */
+#idFrameT .tools .classicButton button.btn-inverse, #idFrameT .tools .dropdownButton button.btn-inverse {
+    color:#fff;
+}
+#idFrameT .tools #settings {
+    color:#fff;
+}
+#idFrameT .btn-toolbar {
+    font-size:14px;
+}
+#idFrameT .tools .dropdown-menu a {
+    color:#fff;
+}
+#idFrameT .tools .dropdown-menu img {
+    width: 25px;
+}
+/** pagination */
+#paginate #tool_navigate input, #paginate #tool_navigate a:hover {
+    background-color: #0377ac;
+}
+#paginate #tool_navigate #NEXT_PAGE {
+  background-image: url("/assets/common/images/icons/sprite_paginate_hover.png") }
+
+#paginate #tool_navigate #PREV_PAGE {
+  background-image: url("/assets/common/images/icons/sprite_paginate_hover.png")}
+
+#paginate #tool_navigate #last {
+  background-image: url("/assets/common/images/icons/sprite_paginate_hover.png")}
+
+#paginate #tool_navigate #first {
+  background-image: url("/assets/common/images/icons/sprite_paginate_hover.png") }
+
+#paginate #tool_navigate #NEXT_PAGE:hover,
+#paginate #tool_navigate #PREV_PAGE:hover,
+#paginate #tool_navigate #last:hover,
+#paginate #tool_navigate #first:hover {
+  background-image: url("/assets/common/images/icons/sprite_paginate_hover.png"); 
+  background-color: #0377ac;
+}
+
+/** dialog */
+/* .ui-dialog,.ui-widget-content {
+    background-color: #1b242b;
+    background: #1b242b;
+}
+.ui-widget-header {
+   color:#fff;
+} */
+#delete-record-form .well-small {
+    height: 165px;
+}
+#PREVIEWBOX, #EDITWINDOW {
+    background-color: #1b242b;
+}
+#delete-record-form .well-small  {
+    color:#fff;
+}
+/** panier */
+#idFrameC #baskets .SSTT img {
+    min-height: 25px;
+}
+#idFrameC #baskets .SSTT span {
+    font-size:14px;
+}
+#idFrameC .tools button {
+    width: 24px;
+}
+
+/** admin */
+#tree li a img {
+    max-width: 16px;
+}
+#tree li a {
+    background-color: transparent;
+}
+.treeview li {
+    color:#fff;
+}
+.treeview ul li span {
+    color:#fff;
+    font-size:14px;
+}
+#THPD_tabs .treeview span {
+    font-size: 14px;
+}
+
+#THPD_tabs .treeview LI.selected SPAN {
+    background-color:transparent!important;
+    font-weight: 700;
+}
+
+/** upload */
+#uploadBox .ui-tabs .ui-tabs-panel {
+    background-color: #eeeff4;
+}
+#uploadBox #fileupload .well {
+    background-color: #cdd3e1;
+}
+#uploadBox .grey_text,#uploadBox .ui-tabs .ui-tabs-nav li a {
+    background-color: #cdd3e1;
+    color:#000;
+}
+#uploadBox .ui-tabs .ui-tabs-nav li.ui-tabs-active,#uploadBox .ui-tabs .ui-tabs-nav li.ui-tabs-active a {
+    background-color: #eeeff4;
+    color:#000;
+}
+#lazaretBox {
+    color:#000;
+}
+/** lightbox */
+.record_display_box .header {
+    color:#000;
+}
+img#EditButAddMultiValued {
+    max-width: 25px;
+}
+.agreement_selector {
+    bottom: 35px;
+}
+/** publication */
+
+#answers .feed .entry {
+    background-color: #cdd3e1;
+    border-color:#cdd3e1;
+}
+#modal_feed form .feeds .feed {
+    color:#000;
+}
+#modal_feed form .feeds .feed.odd {
+    color:#000;
+}
+/* report */
+#dash .answers {
+    background-color: #eeeff4;
+}
+
+#dash .answers .input-append .add-on,#dash .answers .input-prepend .add-on {
+    background-color: #cdd3e1;
+}
+#dash .answers .well-large.well {
+    background-color: #cdd3e1!important;
+}
+#dash .answers #dashboard.well-large.well {
+    background-color: #1b242b!important;   
+}
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+    background:#26b3f7;
+}
+#dashboard .btn-primary.submit-dashboard {
+ background-color: #00b551;
+ background-image: none;
+}
+#dashboard .btn-primary.submit-dashboard:hover {
+    background-color: #009543;
+}
+.ui-widget-content.ui-autocomplete {
+    background-color: #1c232d;
+}

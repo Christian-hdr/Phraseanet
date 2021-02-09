@@ -1,6 +1,6 @@
-$answersInfoDialogBg: $highlightBackgroundAltColor !default;
+$answersInfoDialogBg: #03a9f5 !default;
 $answersInfoDialogColor: $highlightTextColor !default;
-$answersDocInfoBg: $highlightBackgroundAltColor !default;
+$answersDocInfoBg: #03a9f5 !default;
 $answersDocInfoBorder: #000 !default;
 $answersDocInfoColor: $highlightTextColor !default;
 $answersLinkColor: #666666 !default;
@@ -125,7 +125,7 @@ $answersInfoLabelColor: #949494 !default;
     min-width: 105px;
     font-size: 11px;
     line-height: 12px;
-    border-right: 1px solid $answersDocInfoBorder;
+    border-right: 1px solid #fff;
   }
 }
 

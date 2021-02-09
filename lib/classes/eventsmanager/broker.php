@@ -51,6 +51,7 @@ class eventsmanager_broker
                 'eventsmanager_notify_validate',
                 'eventsmanager_notify_validationdone',
                 'eventsmanager_notify_validationreminder',
+		'eventsmanager_notify_upload',
             ]
         ];
 
@@ -188,6 +189,17 @@ class eventsmanager_broker
         }
 
         return $total;
+    }
+    
+    public function delete_notif() {
+	
+        $sql = 'delete FROM notifications WHERE usr_id = :usr_id';
+        $stmt = $this->app->getApplicationBox()->get_connection()->prepare($sql);
+        $stmt->execute([':usr_id' => $this->app->getAuthenticatedUser()->getId()]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+
+        return 'ok';
     }
 
     public function get_notifications()

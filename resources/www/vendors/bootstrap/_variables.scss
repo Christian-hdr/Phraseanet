@@ -88,8 +88,8 @@ $btnBackground:                     $white !default;
 $btnBackgroundHighlight:            darken($white, 10%) !default;
 $btnBorder:                         #ccc !default;
 
-$btnPrimaryBackground:              $linkColor !default;
-$btnPrimaryBackgroundHighlight:     adjust-hue($btnPrimaryBackground, 20%) !default;
+$btnPrimaryBackground:              #03a9f5 !default;
+$btnPrimaryBackgroundHighlight:     #028ccb !default;
 
 $btnInfoBackground:                 #5bc0de !default;
 $btnInfoBackgroundHighlight:        #2f96b4 !default;

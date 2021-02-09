@@ -38,6 +38,11 @@ class Basket
      * @ORM\Column(type="string", length=128)
      */
     private $name;
+    
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $mess;
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -104,6 +109,28 @@ class Basket
     public function __construct()
     {
         $this->elements = new ArrayCollection();
+    }
+    
+    /**
+     * Set message
+     *
+     * @param  string $mess
+     * @return Basket
+     */
+    public function setMess($mess) {
+	$this->mess = $mess;
+
+        return $this;
+    }
+    
+    /**
+     * Get message 
+     *
+     * @return string
+     */
+    public function getMess()
+    {
+        return $this->mess;
     }
 
     /**

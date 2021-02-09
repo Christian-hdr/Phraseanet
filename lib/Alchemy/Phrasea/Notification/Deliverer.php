@@ -52,14 +52,19 @@ class Deliverer
         if (!$mail->getReceiver()) {
             throw new LogicException('You must provide a receiver for a mail notification');
         }
-
-        $message = \Swift_Message::newInstance($this->prefix . $mail->getSubject(), $mail->renderHTML(), 'text/html', 'utf-8');
+		
+		$prefix = $this->prefix;
+//		if ($mail->getEmitter()) {
+//			$prefix = "[".$mail->getEmitter()->getName()."] ";
+//		}
+        $message = \Swift_Message::newInstance($prefix . $mail->getSubject(), $mail->renderHTML(), 'text/html', 'utf-8');
         $message->addPart($mail->getMessage(), 'text/plain', 'utf-8');
 
         $message->setFrom($this->emitter->getEmail(), $this->emitter->getName());
         $message->setTo($mail->getReceiver()->getEmail(), $mail->getReceiver()->getName());
-
+		
         if ($mail->getEmitter()) {
+			$message->setFrom($mail->getEmitter()->getEmail(), $mail->getEmitter()->getName());
             $message->setReplyTo($mail->getEmitter()->getEmail(), $mail->getEmitter()->getName());
         }
 

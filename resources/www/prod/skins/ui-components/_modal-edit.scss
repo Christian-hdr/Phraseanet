@@ -152,8 +152,8 @@
     color: $lightTextColor;
   }
   div.edit_field.active {
-    background-color: $lightBackgroundActiveColor;
-    border: 1px solid $lightBorderActiveColor;
+    background-color: #000;
+    border: 1px solid #000;
   }
   span.fieldvalue {
     white-space: normal;

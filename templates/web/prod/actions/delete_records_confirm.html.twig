@@ -38,6 +38,7 @@
                 </div>
                 <div class="dialog-right-section">
                     <span>{{ nbDelete }} {{ "prod:app trash: record-delete" | trans }}</span>
+		    <span>Etes vous sur ?</span>
                     {% if records.stories().count() %}
                         <label class="checkbox">
                             <input type="checkbox" id="del_children" name="del_children"

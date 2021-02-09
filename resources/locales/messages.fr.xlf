@@ -207,22 +207,22 @@
       </trans-unit>
       <trans-unit id="ac5c6fe2979cfa2496c95dcb218f135fd916040d" resname="%quantity% Stories attached to the WorkZone" approved="yes">
         <source>%quantity% Stories attached to the WorkZone</source>
-        <target state="translated">%quantity% reportages attachés à la zone de travail</target>
+        <target state="translated">%quantity% dossiers attachés à la zone de travail</target>
         <jms:reference-file line="126">Controller/Prod/WorkzoneController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="1c0df10208cc3bed3e1f4c7a814a53b5866d65a1" resname="%quantity% Stories attached to the WorkZone, %quantity_already% already attached" approved="yes">
         <source>%quantity% Stories attached to the WorkZone, %quantity_already% already attached</source>
-        <target state="translated">%quantity% reportages attachés à la zone de travail, %quantity_already% déjà attaché(s)</target>
+        <target state="translated">%quantity% dossiers attachés à la zone de travail, %quantity_already% déjà attaché(s)</target>
         <jms:reference-file line="132">Controller/Prod/WorkzoneController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="29b66b2b2cf39bb0b27d663005ca362e09fc836b" resname="%quantity% Story attached to the WorkZone" approved="yes">
         <source>%quantity% Story attached to the WorkZone</source>
-        <target state="translated">%quantity% reportage attaché à la zone de travail</target>
+        <target state="translated">%quantity% dossier attaché à la zone de travail</target>
         <jms:reference-file line="124">Controller/Prod/WorkzoneController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="9caa987682874e84f7348c4d157dd6246946a41c" resname="%quantity% Story attached to the WorkZone, %quantity_already% already attached" approved="yes">
         <source>%quantity% Story attached to the WorkZone, %quantity_already% already attached</source>
-        <target state="translated">%quantity% reportage attaché à la zone de travail, %quantity_already% déjà attaché(s)</target>
+        <target state="translated">%quantity% dossier attaché à la zone de travail, %quantity_already% déjà attaché(s)</target>
         <jms:reference-file line="130">Controller/Prod/WorkzoneController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="be8eccbb7ae52b5889cb5b665142939b66b9bfa0" resname="%quantity% User added to list" approved="yes">
@@ -396,7 +396,7 @@
       </trans-unit>
       <trans-unit id="4412a659c3e1ca169796ab2f540a932ea7cbe2a4" resname="*Phraseanet Navigator* is a smartphone application that allow user to connect on this instance" approved="yes">
         <source>*Phraseanet Navigator* is a smartphone application that allow user to connect on this instance</source>
-        <target state="translated">*Phraseanet Navigator* est une application mobile permettant à des utilisateurs de se connecter sur cette instance Phraseanet.</target>
+        <target state="translated">*Gemnet Navigator* est une application mobile permettant à des utilisateurs de se connecter sur cette instance Gemnet.</target>
         <jms:reference-file line="28">Form/Configuration/APIClientsFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="7400a82d671391e91d83ed4a0227a3a5aff6f929" resname="1 record" approved="yes">
@@ -509,7 +509,7 @@
       </trans-unit>
       <trans-unit id="1745c0ee532c1592e3751ef7ef48c382df74c457" resname="A third-party application is a product developed apart from Phraseanet and that would access Phraseanet data." approved="yes">
         <source>A third-party application is a product developed apart from Phraseanet and that would access Phraseanet data.</source>
-        <target state="translated">Une application tierce est un produit développé en dehors de Phraseanet et qui accède à des données Phraseanet.</target>
+        <target state="translated">Une application tierce est un produit développé en dehors de Gemnet et qui accède à des données Gemnet.</target>
         <jms:reference-file line="55">web/account/authorized_apps.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="342055b6954afaafc7585b0d8e5a0b59e400bea4" resname="A value does not match an expected format" approved="yes">
@@ -691,7 +691,7 @@
       </trans-unit>
       <trans-unit id="18a7d7025f09d8fd494b56d81e5208ec96510c99" resname="Add an admin" approved="yes">
         <source>Add an admin</source>
-        <target state="translated">Ajouter un administrateur Phraseanet</target>
+        <target state="translated">Ajouter un administrateur Gemnet</target>
         <jms:reference-file line="109">web/admin/dashboard.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="f347a8ddd22508ed0310a2f9d8cf43dd96be34b1" resname="Add user" approved="yes">
@@ -851,7 +851,7 @@
       </trans-unit>
       <trans-unit id="c264a7efdbe0e0af2a6fe69e2bc9a89b90c5ec0e" resname="Allowed to access report" approved="yes">
         <source>Allowed to access report</source>
-        <target state="translated">Autoriser à consulter Phraseanet Report</target>
+        <target state="translated">Autoriser à consulter Gemnet Report</target>
         <jms:reference-file line="414">web/admin/editusers.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="a79a26fd0d867d56e440db7970bedeb81120db5e" resname="Allowed to add" approved="yes">
@@ -906,7 +906,7 @@
       </trans-unit>
       <trans-unit id="ebd447ea09611b090d7b8a12835ffaf79ea17e47" resname="Also delete records that rely on groupings." approved="yes">
         <source>Also delete records that rely on groupings.</source>
-        <target state="translated">Supprimer également les enregistrements appartenant à des reportages</target>
+        <target state="translated">Supprimer également les enregistrements appartenant à des dossiers</target>
         <jms:reference-file line="27">prod/actions/delete_records_confirm.html.twig</jms:reference-file>
         <jms:reference-file line="44">prod/actions/delete_records_confirm.html.twig</jms:reference-file>
       </trans-unit>
@@ -1030,7 +1030,7 @@
       </trans-unit>
       <trans-unit id="244b484023b5b9473c3ff89cb6b956bc1985da43" resname="Apparait aussi dans ces reportages" approved="yes">
         <source>Apparait aussi dans ces reportages</source>
-        <target state="translated">Aussi dans les reportages suivants</target>
+        <target state="translated">Aussi dans les dossiers suivants</target>
         <jms:reference-file line="4">prod/preview/appears_in.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="022643ac43e94269443f7d30e114df8e13fe0f37" resname="Appbox is unreachable" approved="yes">
@@ -1055,7 +1055,7 @@
       </trans-unit>
       <trans-unit id="ee3ac8b2def14068e5827dcd2499e831cb89712c" resname="Application title" approved="yes">
         <source>Application title</source>
-        <target state="translated">Titre donné à l'instance Phraseanet</target>
+        <target state="translated">Titre donné à l'instance Gemnet</target>
         <jms:reference-file line="30">Form/Configuration/GeneralFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="866fef154cc77e6c30d7c9e97387dae0fb72dd08" resname="Application web" approved="yes">
@@ -1092,7 +1092,7 @@
       </trans-unit>
       <trans-unit id="0e585e139fb6fc86d30e02ba78bdbb4dff6ac6b9" resname="Apply status on story children." approved="yes">
         <source>Apply status on story children.</source>
-        <target state="translated">Appliquer les status sur les documents du reportage.</target>
+        <target state="translated">Appliquer les status sur les documents du dossier.</target>
         <jms:reference-file line="105">actions/Property/index.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="01f240fd282242c9c32ecdaa4b503881a2e6a611" resname="Apply template" approved="yes">
@@ -1282,7 +1282,7 @@
       </trans-unit>
       <trans-unit id="d5f364d5d9a0a95fdba37f29a65a9ba61d6329ef" resname="Authorize *Phraseanet Navigator*" approved="yes">
         <source>Authorize *Phraseanet Navigator*</source>
-        <target state="translated">OBSOLETE, autoriser *Phraseanet Navigator*</target>
+        <target state="translated">OBSOLETE, autoriser *Gemnet Navigator*</target>
         <jms:reference-file line="27">Form/Configuration/APIClientsFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="6e1ead524b95ba3b45281df7ba45d2addbbf1a79" resname="Authorize Microsoft Office Plugin to connect." approved="yes">
@@ -1433,7 +1433,7 @@
       </trans-unit>
       <trans-unit id="375d9298999fbe406983b3c1beb73b2f6b1cd830" resname="Bonjour, vous etes sur le point d'installer Phraseanet." approved="yes">
         <source>Bonjour, vous etes sur le point d'installer Phraseanet.</source>
-        <target state="translated">Bonjour, vous êtes sur le point d'installer Phraseanet.</target>
+        <target state="translated">Bonjour, vous êtes sur le point d'installer Gemnet.</target>
         <jms:reference-file line="313">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="fe4c7f5c4c2bce6a7c44ea7406a0f3a83d0e21d1" resname="Bridge upload fail" approved="yes">
@@ -1632,7 +1632,7 @@
       </trans-unit>
       <trans-unit id="3062356beeb0f20cb9418d55769ea256059d611e" resname="Certaines donnees du reportage ont change" approved="yes">
         <source>Certaines donnees du reportage ont change</source>
-        <target state="translated">Certaines données du reportage ont changé</target>
+        <target state="translated">Certaines données du dossier ont changé</target>
         <jms:reference-file line="64">prod/WorkZone/Story.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="fadf8a55b41e9d1dd6b5007d5e846e689df6b2f6" resname="Certaines publications n'ont pu etre effectuees, verifiez vos parametres" approved="yes">
@@ -1763,20 +1763,20 @@
       </trans-unit>
       <trans-unit id="30c54a96f8011b39819ba18bcb53fcbb092d650d" resname="Collection" approved="yes">
         <source>Collection</source>
-        <target state="translated">Collection</target>
+        <target state="translated">Thematique</target>
         <jms:reference-file line="12">admin/databox/details.html.twig</jms:reference-file>
         <jms:reference-file line="3">prod/Story/Create.html.twig</jms:reference-file>
         <jms:reference-file line="344">prod/upload/lazaret.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="814cd4d896d0d93eac2f4d71dc24c91a46cd5e28" resname="Collection %collection%" approved="yes">
         <source>Collection %collection%</source>
-        <target state="translated">Collection %collection%</target>
+        <target state="translated">Thematique %collection%</target>
         <jms:reference-file line="46">web/admin/editusers_quotas.html.twig</jms:reference-file>
         <jms:reference-file line="8">web/admin/editusers_timelimit.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="915c5b033858560e7d04ae453279b9418637eade" resname="Collection empty successful" approved="yes">
         <source>Collection empty successful</source>
-        <target state="translated">Collection vidée avec succès</target>
+        <target state="translated">Thematique vidée avec succès</target>
         <jms:reference-file line="131">Controller/Admin/CollectionController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="898b7e63805ba2e4277ee0f4523c6376dcd0e579" resname="Collection order" approved="yes">
@@ -2047,7 +2047,7 @@
       </trans-unit>
       <trans-unit id="27c26eb5f5ded79caa39c9dd44376bf3556f6466" resname="Creez une application pour commencer a utiliser l'API Phraseanet" approved="yes">
         <source>Creez une application pour commencer a utiliser l'API Phraseanet</source>
-        <target state="translated">Créer une application pour commencer à utiliser l'API Phraseanet</target>
+        <target state="translated">Créer une application pour commencer à utiliser l'API Gemnet</target>
         <jms:reference-file line="62">web/developers/applications.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="416664d8d18fa9ff561c5c0e5c8b6c7b1e644449" resname="Cumulative total" approved="yes">
@@ -2320,7 +2320,7 @@
       </trans-unit>
       <trans-unit id="eedc3da946c6f6f8cca37df0edc42543d09e1464" resname="Demarrer avec l'API Phraseanet" approved="yes">
         <source>Demarrer avec l'API Phraseanet</source>
-        <target state="translated">Démarrer avec l'API Phraseanet</target>
+        <target state="translated">Démarrer avec l'API Gemnet</target>
         <jms:reference-file line="58">web/developers/applications.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="53577bb5df0ee9b6376e87f4896b6957a25d7a43" resname="Deny" approved="yes">
@@ -2444,7 +2444,7 @@
       </trans-unit>
       <trans-unit id="9a4f75566de9f7c0e2887b1868620d6432dbb767" resname="Do you authorize the application %application_name% to access to your Phraseanet content?" approved="yes">
         <source>Do you authorize the application %application_name% to access to your Phraseanet content?</source>
-        <target state="translated">Autoriser l'application %application_name% à accéder à des contenus Phraseanet ?</target>
+        <target state="translated">Autoriser l'application %application_name% à accéder à des contenus Gemnet ?</target>
         <jms:reference-file line="28">login/oauth/authorize-access.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="9909deb7fb0b9534e6638819716369823768cc87" resname="Do you really want to delete the field %s ?" approved="yes">
@@ -3346,7 +3346,7 @@
       </trans-unit>
       <trans-unit id="ee485ef50d127d2c51fe0091051d8c390d03ed59" resname="Gives the option to your application to communicate with Phraseanet. This webhook can be used to trigger some actions on your application side." approved="yes">
         <source>Gives the option to your application to communicate with Phraseanet. This webhook can be used to trigger some actions on your application side.</source>
-        <target state="translated">Donne la possibilité à votre application de communiquer avec Phraseanet. Ce Webhook peut être utilisé pour déclencher des actions sur l'application distante.</target>
+        <target state="translated">Donne la possibilité à votre application de communiquer avec Gemnet. Ce Webhook peut être utilisé pour déclencher des actions sur l'application distante.</target>
         <jms:reference-file line="75">web/developers/application.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="61dedcf053ff33692baacbf7789c5d7195d9acbe" resname="Good" approved="yes">
@@ -3584,7 +3584,7 @@
       </trans-unit>
       <trans-unit id="fcefe7f6a4f82c63fc9f346cd3dcd87a8adcb957" resname="Indexing Batch (collections/databox)" approved="yes">
         <source>Indexing Batch (collections/databox)</source>
-        <target state="translated">Lot d'indexation (Collections/Databox)</target>
+        <target state="translated">Lot d'indexation (Thematiques/Databox)</target>
         <jms:reference-file line="40">TaskManager/Job/IndexerJob.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="54937b3a4f8cfa4576692882d3ff7b14c90c4ce5" resname="Informations" approved="yes">
@@ -3677,7 +3677,7 @@
       </trans-unit>
       <trans-unit id="a1244ab057df1737a47854d003cc98ec33ad3c09" resname="Invalid target collection" approved="yes">
         <source>Invalid target collection</source>
-        <target state="translated">Collection de destination invalide</target>
+        <target state="translated">Thematique de destination invalide</target>
         <jms:reference-file line="92">Controller/Prod/MoveCollectionController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="72194a4e30eb11f8611b35e5339851fe3e766353" resname="Invalid unlock link." approved="yes">
@@ -3694,7 +3694,7 @@
       </trans-unit>
       <trans-unit id="3067f6d77794b736024c9a5594c1823612581e07" resname="It is not recommended to install Phraseanet without HTTPS support" approved="yes">
         <source>It is not recommended to install Phraseanet without HTTPS support</source>
-        <target state="translated">Il n'est pas recommandé d'installer Phraseanet sans protocole HTTPS</target>
+        <target state="translated">Il n'est pas recommandé d'installer Gemnet sans protocole HTTPS</target>
         <jms:reference-file line="78">Phrasea/Controller/SetupController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="feed3517f845bc792002627ad5585e4a70fb952b" resname="It stores users datas, rights, and references to DataBoxes where records are stored." approved="yes">
@@ -4152,7 +4152,7 @@
       </trans-unit>
       <trans-unit id="cbcbdf92e7a47c81ec1719f03f00d8e6c5b5f5ef" resname="Message automatique de Phraseanet" approved="yes">
         <source>Message automatique de Phraseanet</source>
-        <target state="translated">Message automatique de Phraseanet</target>
+        <target state="translated">Message automatique de Gemnet</target>
         <jms:reference-file line="128">templates/web/email-template.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="955ec8ea75c8898eb99301a43846a8b9fb34a022" resname="Mettez à jour votre navigateur ou téléchargez un navigateur plus récent." approved="yes">
@@ -4208,7 +4208,7 @@
       </trans-unit>
       <trans-unit id="9321a86c28d944244ce11115d852e79d190b0bcd" resname="Missing target collection" approved="yes">
         <source>Missing target collection</source>
-        <target state="translated">Collection de destination manquante</target>
+        <target state="translated">Thematique de destination manquante</target>
         <jms:reference-file line="78">Controller/Prod/MoveCollectionController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="b0def594904c1cbf973fce8978d282a64d446abb" resname="Missing tests parameter" approved="yes">
@@ -4519,7 +4519,7 @@
       </trans-unit>
       <trans-unit id="18ee7ad22bf04f818fd95599481303c7f7d1b29f" resname="Notify third party application when an event occurs in Phraseanet" approved="yes">
         <source>Notify third party application when an event occurs in Phraseanet</source>
-        <target state="translated">Notifier l'application tierce lorsqu'un événement se produit dans Phraseanet</target>
+        <target state="translated">Notifier l'application tierce lorsqu'un événement se produit dans Gemnet</target>
         <jms:reference-file line="74">TaskManager/Job/WebhookJob.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="3ccc3824ae2ffdfea7482564cbc8cf35de78766d" resname="Notify users about this publication" approved="yes">
@@ -4752,32 +4752,32 @@
       </trans-unit>
       <trans-unit id="6cc2304a4cac479507c6278fa9cbdb90ca26f568" resname="Phraseanet DataBoxes are MySQL databases, queryable by Phraseanet ApplicationBox." approved="yes">
         <source>Phraseanet DataBoxes are MySQL databases, queryable by Phraseanet ApplicationBox.</source>
-        <target state="translated">Les Databoxes Phraseanet sont des bases de données MySQL, requêtables par l'ApplicationBox Phraseanet.</target>
+        <target state="translated">Les Databoxes Gemnet sont des bases de données MySQL, requêtables par l'ApplicationBox Gemnet.</target>
         <jms:reference-file line="849">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="5690614063267463abafaad1a8ba1514ba101b99" resname="Phraseanet client API" approved="yes">
         <source>Phraseanet client API</source>
-        <target state="translated">API cliente Phraseanet</target>
+        <target state="translated">API cliente Gemnet</target>
         <jms:reference-file line="52">Form/Configuration/MainConfigurationFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="f143f17807f67cfc6047a85c0df963d3b553770a" resname="Phraseanet embarque un moteur de taches pour la lecture / ecriture des metadonnes, et autre operations" approved="yes">
         <source>Phraseanet embarque un moteur de taches pour la lecture / ecriture des metadonnes, et autre operations</source>
-        <target state="translated">Phraseanet embarque un moteur de tâches pour la lecture et l'écriture des métadonnées, la réalisation d'autres opérations</target>
+        <target state="translated">Gemnet embarque un moteur de tâches pour la lecture et l'écriture des métadonnées, la réalisation d'autres opérations</target>
         <jms:reference-file line="815">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="17d47194ec888edc3eb2a8f200f0400f787924ff" resname="Phraseanet guest-access is disabled" approved="yes">
         <source>Phraseanet guest-access is disabled</source>
-        <target state="translated">L'accès invité de Phraseanet est désactivé.</target>
+        <target state="translated">L'accès invité de Gemnet est désactivé.</target>
         <jms:reference-file line="544">Controller/Root/LoginController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="f76e81b1e826c0255a8e7e2b0e9c8f6c33bba34c" resname="Phraseanet may require many binaries." approved="yes">
         <source>Phraseanet may require many binaries.</source>
-        <target state="translated">Phraseanet peut utiliser de nombreux éxécutables</target>
+        <target state="translated">Gemnet peut utiliser de nombreux éxécutables</target>
         <jms:reference-file line="414">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="a5c95af56dfec6e64a39eff10ce40614ec46030c" resname="Phraseanet strongly recommends the use of %link_start%MariaDB%link_end% as a replacement for MySQL." approved="yes">
         <source>Phraseanet strongly recommends the use of %link_start%MariaDB%link_end% as a replacement for MySQL.</source>
-        <target state="translated">Phraseanet recommande fortement l'utilisation de %link_start%MariaDB%link_end% à la place de MySQL.</target>
+        <target state="translated">Gemnet recommande fortement l'utilisation de %link_start%MariaDB%link_end% à la place de MySQL.</target>
         <jms:reference-file line="609">web/setup/step2.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="cd95b41f85ddc0922e3fce8844279c55e9e3cdd9" resname="Playlist" approved="yes">
@@ -5068,13 +5068,13 @@
       <trans-unit id="dcf907ccbbcda0c0a828ef73ff1e6320748c1fad" resname="Push::une validation est une demande d'appreciation a d'autres personnes" approved="yes">
         <source>Push::une validation est une demande d'appreciation a d'autres personnes</source>
         <target state="translated">La validation permet d'adresser des demandes d'appréciation de documents auprès d'utilisateurs. 
-Ils recevront un e-mail contenant un lien lançant Phraseanet Lightbox. Cette interface les autorise à visualiser, télécharger, et à émettre des avis et commentaires sur le contenu diffusé. 
+Ils recevront un e-mail contenant un lien lançant Gemnet Lightbox. Cette interface les autorise à visualiser, télécharger, et à émettre des avis et commentaires sur le contenu diffusé. 
 Pour les utilisateurs authentifiés, la demande de validation est également disponible sous la forme d'un panier reçu dans la zone de travail.</target>
         <jms:reference-file line="159">prod/actions/Push.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="3e45857148ed08b19a425b5f4a2775e30dd346a7" resname="Push::unpush permet d'envoyer un lot d'image a des destinataires" approved="yes">
         <source>Push::unpush permet d'envoyer un lot d'image a des destinataires</source>
-        <target state="translated">Le Push permet d'adresser des documents à des utilisateurs. Ils recevront un e-mail contenant un lien lançant Phraseanet Lightbox. Cette interface les autorise à visualiser et à télécharger le contenu diffusé. Pour les utilisateurs authentifiés, un Push est également disponible sous la forme d'un panier reçu dans la zone de travail.</target>
+        <target state="translated">Le Push permet d'adresser des documents à des utilisateurs. Ils recevront un e-mail contenant un lien lançant Gemnet Lightbox. Cette interface les autorise à visualiser et à télécharger le contenu diffusé. Pour les utilisateurs authentifiés, un Push est également disponible sous la forme d'un panier reçu dans la zone de travail.</target>
         <jms:reference-file line="157">prod/actions/Push.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="a60f2c73604f623449f263e78f5857849ad5e429" resname="Quality" approved="yes">
@@ -5101,7 +5101,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="64ef3e9b9c1030a3df3515f8837f98d76950dd3a" resname="Raccourcis claviers de la zone des paniers :" approved="yes">
         <source>Raccourcis claviers de la zone des paniers :</source>
-        <target state="translated"><![CDATA[Raccourcis de la zone des paniers & reportages]]></target>
+        <target state="translated"><![CDATA[Raccourcis de la zone des paniers & dossiers]]></target>
         <jms:reference-file line="532">web/prod/index.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="0fa257c61469082fe30f197cec92755b9b4fa8f0" resname="Raccourcis claviers en cours de editing :" approved="yes">
@@ -5332,7 +5332,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="0a10e48d87332985ab5d267f0a5aaae0a9b87b00" resname="Record removed from story" approved="yes">
         <source>Record removed from story</source>
-        <target state="translated">Enregistrement supprimé du reportage</target>
+        <target state="translated">Enregistrement supprimé du dossier</target>
         <jms:reference-file line="156">Controller/Prod/StoryController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="23e6fd4f4c57db844886711c1f92a6411880f3b7" resname="Record_id" approved="yes">
@@ -5462,7 +5462,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="ee45c30326b750387589752c0f75e1dd87ddc7e4" resname="Report" approved="yes">
         <source>Report</source>
-        <target state="translated">Afficher dans Phraseanet Report</target>
+        <target state="translated">Afficher dans Gemnet Report</target>
         <jms:reference-file line="229">admin/fields/templates.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="c0d6afbb9a5d52be258437c6100523c0ca890975" resname="Report generation may take a long time to generate, depending on the number of collections and the period selected." approved="yes">
@@ -6093,32 +6093,32 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="67b5fefd39cf2223cfc9023e91571fd2a87cd76a" resname="Stories" approved="yes">
         <source>Stories</source>
-        <target state="translated">Reportages</target>
+        <target state="translated">Dossiers</target>
         <jms:reference-file line="31">Form/Configuration/SearchEngineFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="315bc332aafca63cad8ac042c2e2f5111544fe9d" resname="Story Not Found" approved="yes">
         <source>Story Not Found</source>
-        <target state="translated">Reportage inconnu</target>
+        <target state="translated">Dossier inconnu</target>
         <jms:reference-file line="2506">Controller/Api/V1Controller.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="94e347da85f4797810ed7987973c8ef79092057e" resname="Story created" approved="yes">
         <source>Story created</source>
-        <target state="translated">Reportage créé</target>
+        <target state="translated">Dossier créé</target>
         <jms:reference-file line="84">Controller/Prod/StoryController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="e26b421526a0f0777047a4ad56ded8cb9afbc138" resname="Story detached from the WorkZone" approved="yes">
         <source>Story detached from the WorkZone</source>
-        <target state="translated">Reportage détaché de l'espace de travail</target>
+        <target state="translated">Dossier détaché de l'espace de travail</target>
         <jms:reference-file line="165">Controller/Prod/WorkzoneController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="94477749620273362f576c96c2f4c3b00250b563" resname="Story name" approved="yes">
         <source>Story name</source>
-        <target state="translated">Nom du reportage</target>
+        <target state="translated">Nom du dossier</target>
         <jms:reference-file line="10">prod/Story/Create.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="99d3daf4dbe8d07dc3e14c9840c17f17e28c94d9" resname="Story updated" approved="yes">
         <source>Story updated</source>
-        <target state="translated">Reportage mis à jour</target>
+        <target state="translated">Dossier mis à jour</target>
         <jms:reference-file line="210">Controller/Prod/StoryController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="92822e4942a5e4eee63c1ccbb4dc08a6028c65bb" resname="Story_id" approved="yes">
@@ -6243,7 +6243,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="1808de8bbb03d09a3cf77be3497fbb271b3bbb10" resname="Supprimer egalement les documents rattaches a ces regroupements" approved="yes">
         <source>Supprimer egalement les documents rattaches a ces regroupements</source>
-        <target state="translated">Egalement supprimer les documents rattachés à ces reportages ?</target>
+        <target state="translated">Egalement supprimer les documents rattachés à ces dossiers ?</target>
         <jms:reference-file line="39">Controller/Prod/LanguageController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="8f040009fef60fd317d7519f22f4fe97ee277dc0" resname="Symbolized by" approved="yes">
@@ -6344,7 +6344,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="903b3a1a72b51b7b51f85ec8c81def53ed9c9b0c" resname="The Phraseanet Web API allows other web application to rely on this instance" approved="yes">
         <source>The Phraseanet Web API allows other web application to rely on this instance</source>
-        <target state="translated">The Phraseanet Web API allows other web application to rely on this instance</target>
+        <target state="translated">The Gemnet Web API allows other web application to rely on this instance</target>
         <jms:reference-file line="23">Form/Configuration/APIClientsFormType.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="2558cc2c887bbe4e2444ec6ef83b4982386e871a" resname="The URL you used is out of date, please login" approved="yes">
@@ -6738,7 +6738,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="d32751443628a0d2c5b31b441c1e2b3001f35dfd" resname="Unable to add file to Phraseanet" approved="yes">
         <source>Unable to add file to Phraseanet</source>
-        <target state="translated">Impossible d'ajouter des fichiers à Phraseanet</target>
+        <target state="translated">Impossible d'ajouter des fichiers à Gemnet</target>
         <jms:reference-file line="195">Controller/Admin/FeedController.php</jms:reference-file>
         <jms:reference-file line="310">Controller/Prod/UploadController.php</jms:reference-file>
       </trans-unit>
@@ -6945,7 +6945,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="74126bf38974fc3d5bf2d0844567be2be473e122" resname="Use my Phraseanet account" approved="yes">
         <source>Use my Phraseanet account</source>
-        <target state="translated">Utiliser mon compte Phraseanet</target>
+        <target state="translated">Utiliser mon compte Gemnet</target>
         <jms:reference-file line="106">login/providers/mapping.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="c42cc91c040b3c093f851494375a1be868018231" resname="Use recaptcha API" approved="yes">
@@ -7536,7 +7536,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="dff09f0ed93eb1657329f3588569d2c43b4e65ff" resname="You can not edit this story" approved="yes">
         <source>You can not edit this story</source>
-        <target state="translated">Vous ne disposez pas des droits suffisants pour éditer ce reportage</target>
+        <target state="translated">Vous ne disposez pas des droits suffisants pour éditer ce dossier</target>
         <jms:reference-file line="192">Controller/Prod/StoryController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="4a67615bcd64fcc9443c499676a462d835ad841e" resname="You can not upload files" approved="yes">
@@ -7669,7 +7669,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="dad67eb2125fe612c37ae8195438f7ff834a7bb3" resname="Your %provider_name% account matchs a Phraseanet account" approved="yes">
         <source>Your %provider_name% account matchs a Phraseanet account</source>
-        <target state="translated">Votre compte %provider_name% correspond à un compte Phraseanet.</target>
+        <target state="translated">Votre compte %provider_name% correspond à un compte Gemnet.</target>
         <jms:reference-file line="19">login/providers/mapping.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="37247cfed1c419a5dfff77cac1e5698ea4002ae5" resname="Your access on %application%" approved="yes">
@@ -7846,7 +7846,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="74894db9388e92ba33510dd3881626d42d29bd20" resname="action:: nouveau reportage" approved="yes">
         <source>action:: nouveau reportage</source>
-        <target state="translated">Nouveau reportage</target>
+        <target state="translated">Nouveau dossier</target>
         <jms:reference-file line="154">web/prod/index.html.twig</jms:reference-file>
         <jms:reference-file line="156">web/prod/index.html.twig</jms:reference-file>
         <jms:reference-file line="157">web/prod/index.html.twig</jms:reference-file>
@@ -7887,7 +7887,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="3255d759dad94eb721100214aa939ff692a4c2cd" resname="admin:: La collection n'a pas ete creee : vous devez donner un nom a votre collection" approved="yes">
         <source>admin:: La collection n'a pas ete creee : vous devez donner un nom a votre collection</source>
-        <target state="translated">Collection non créée : vous devez donner un nom à la collection</target>
+        <target state="translated">Thematique non créée : vous devez donner un nom à la collection</target>
         <jms:reference-file line="8">admin/collection/create.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="21a0648a0d5db7740c7ed2ff84041aeb87c8224a" resname="admin:: appliquer le modele" approved="yes">
@@ -8067,7 +8067,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="d2ac37eb488617494c60906afae1ef5510ee92dc" resname="admin::base:collection:  numero de collection locale" approved="yes">
         <source>admin::base:collection:  numero de collection locale</source>
-        <target state="translated">Id de Collection ("base_id" API side).</target>
+        <target state="translated">Id de Thematique ("base_id" API side).</target>
         <jms:reference-file line="32">admin/collection/collection.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="1f17890a6f5675a0542b997121fc105bb6bd4466" resname="admin::base:collection: Creer une collection" approved="yes">
@@ -8095,7 +8095,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="3d84e19b243dea8a79762b90a3086d96e5cc2c00" resname="admin::base:collection: activer la collection" approved="yes">
         <source>admin::base:collection: activer la collection</source>
-        <target state="translated">Collection activée</target>
+        <target state="translated">Thematique activée</target>
         <jms:reference-file line="34">admin/collection/collection.html.twig</jms:reference-file>
         <jms:reference-file line="122">admin/collection/collection.html.twig</jms:reference-file>
       </trans-unit>
@@ -8193,7 +8193,7 @@ Pour les utilisateurs authentifiés, la demande de validation est également dis
       </trans-unit>
       <trans-unit id="49d7893a715ec019e2dd350e6e02b03a4c3fadae" resname="admin::collection" approved="yes">
         <source>admin::collection</source>
-        <target state="translated">Collection</target>
+        <target state="translated">Thematique</target>
         <jms:reference-file line="196">admin/user/registrations.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="8ad9821ba8362eba00ad44b771baeb6f39e60142" resname="admin::collection: Confirmez vous la suppression de cette collection ?" approved="yes">
@@ -8584,7 +8584,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="d8e0c217096d84bac92fec38c4fd72265de65306" resname="admin::monitor: module report" approved="yes">
         <source>admin::monitor: module report</source>
-        <target state="translated">Report</target>
+        <target state="translated">Rapport</target>
         <jms:reference-file line="118">Controller/Admin/ConnectedUsersController.php</jms:reference-file>
         <jms:reference-file line="82">lib/classes/phrasea.php</jms:reference-file>
         <jms:reference-file line="61">web/admin/connected-users.html.twig</jms:reference-file>
@@ -9357,7 +9357,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="6bca60e4b2d44b5623e626f9ff951ba6605e975f" resname="collection.label.unknown" approved="yes">
         <source>collection.label.unknown</source>
-        <target state="translated">Collection inconnue</target>
+        <target state="translated">Thematique inconnue</target>
         <jms:reference-file line="204">lib/classes/phrasea.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="2fddc09141619140a386d62d12fc79a784dee067" resname="commande::deadline" approved="yes">
@@ -9710,7 +9710,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="ac8d5acf555e427edbdcb05033256148d4bf9204" resname="help::help-section-bullet: search-in-document" approved="yes">
         <source>help::help-section-bullet: search-in-document</source>
-        <target state="translated">Rechercher en mode Documents ou en mode Reportages</target>
+        <target state="translated">Rechercher en mode Documents ou en mode Dossiers</target>
         <jms:reference-file line="18">prod/results/help.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="d37e6d50ca4af373ad217e5c6aa905f0deb49791" resname="help::help-section-bullet: use-EXCEPT-operator" approved="yes">
@@ -10240,7 +10240,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="3d1af7e03f0dbeec721b0d8bb67274bb1ebd1704" resname="panier:: Un reportage ne peux recevoir que des elements provenants de la base ou il est enregistre" approved="yes">
         <source>panier:: Un reportage ne peux recevoir que des elements provenants de la base ou il est enregistre</source>
-        <target state="translated">Un reportage ne peut pas recevoir d'éléments provenant d'une base autre que celle à laquelle il est rattaché</target>
+        <target state="translated">Un dossier ne peut pas recevoir d'éléments provenant d'une base autre que celle à laquelle il est rattaché</target>
         <jms:reference-file line="64">Controller/Prod/LanguageController.php</jms:reference-file>
         <jms:reference-file line="73">Controller/Prod/LanguageController.php</jms:reference-file>
       </trans-unit>
@@ -10281,12 +10281,12 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="c8ec6648f8dee9ecb9c1afac0cc45fab4eb6d77c" resname="panier::Attention, vous etes sur le point de supprimer un element du reportage. Merci de confirmer votre action." approved="yes">
         <source>panier::Attention, vous etes sur le point de supprimer un element du reportage. Merci de confirmer votre action.</source>
-        <target state="translated">Attention, vous êtes sur le point de supprimer un élément du reportage. Merci de confirmer votre action.</target>
+        <target state="translated">Attention, vous êtes sur le point de supprimer un élément du dossier. Merci de confirmer votre action.</target>
         <jms:reference-file line="61">Controller/Prod/LanguageController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="6042f1b603786999372cc2e1cf8bae7f12b2c65b" resname="panier::Supression d'un element d'un reportage" approved="yes">
         <source>panier::Supression d'un element d'un reportage</source>
-        <target state="translated">Suppression d'un élément d'un reportage</target>
+        <target state="translated">Suppression d'un élément d'un dossier</target>
         <jms:reference-file line="60">Controller/Prod/LanguageController.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="16ebcc75c9e7a47587664d40b47f77fa586608f5" resname="paniers:: panier recu de %pusher%" approved="yes">
@@ -10376,7 +10376,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="671c1d1697d721faf907993f6dcd7c11aa8eb61e" resname="phraseanet:: collection" approved="yes">
         <source>phraseanet:: collection</source>
-        <target state="translated">Collection</target>
+        <target state="translated">Thematique</target>
         <jms:reference-file line="11">admin/collection/collection.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="42e75c80b7e4b7fb005170c15a981f290cd494e1" resname="phraseanet:: dbname" approved="yes">
@@ -10517,7 +10517,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="70c4053d038cd11fa8fcb91bf79e580b89fad194" resname="phraseanet::erreur: La connection au serveur Phraseanet semble etre indisponible" approved="yes">
         <source>phraseanet::erreur: La connection au serveur Phraseanet semble etre indisponible</source>
-        <target state="translated">La connexion au serveur Phraseanet semble être indisponible.</target>
+        <target state="translated">La connexion au serveur Gemnet semble être indisponible.</target>
         <jms:reference-file line="36">Controller/Prod/LanguageController.php</jms:reference-file>
         <jms:reference-file line="37">web/admin/index.html.twig</jms:reference-file>
       </trans-unit>
@@ -10647,7 +10647,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="a2dfbbcaf441131e47dcd23530fa98f1155999ff" resname="phraseanet::type:: reportages" approved="yes">
         <source>phraseanet::type:: reportages</source>
-        <target state="translated">Reportages</target>
+        <target state="translated">Dossiers</target>
         <jms:reference-file line="216">web/prod/index.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="866330f63ad6553c27c7c4a60fd6354d4291e2b3" resname="phraseanet::type:: videos" approved="yes">
@@ -10811,7 +10811,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="8b8698f202f815bbde691f54c7d51b691bef0263" resname="prod::collection deplacer egalement les documents rattaches a ce(s) regroupement(s)" approved="yes">
         <source>prod::collection deplacer egalement les documents rattaches a ce(s) regroupement(s)</source>
-        <target state="translated">Déplacer également les documents de ces reportages ?</target>
+        <target state="translated">Déplacer également les documents de ces dossiers ?</target>
         <jms:reference-file line="50">prod/actions/collection_default.html.twig</jms:reference-file>
       </trans-unit>
       <trans-unit id="2f987eae12ec277343efeb90258ee01e25ca6385" resname="prod::download: delete-marking-stamp" approved="yes">
@@ -10941,7 +10941,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="36fa870bac03b1a7c83f2b7030bf93ed4718e0a7" resname="prod::facet:collection_label" approved="yes">
         <source>prod::facet:collection_label</source>
-        <target state="translated">Collections</target>
+        <target state="translated">Thematiques</target>
         <jms:reference-file line="97">SearchEngine/Elastic/ElasticsearchOptions.php</jms:reference-file>
       </trans-unit>
       <trans-unit id="12988153991e94fd6fc58934903504b0bf03c30a" resname="prod::facet:doctype_label" approved="yes">
@@ -11488,7 +11488,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="48808e405192603e079ef1ccbbc1a1df98e317bd" resname="report:: collections" approved="yes">
         <source>report:: collections</source>
-        <target state="translated">Collections</target>
+        <target state="translated">Thematiques</target>
         <jms:reference-file line="53">Controller/Report/InformationController.php</jms:reference-file>
         <jms:reference-file line="282">Controller/Report/InformationController.php</jms:reference-file>
         <jms:reference-file line="283">Controller/Report/RootController.php</jms:reference-file>
@@ -12090,7 +12090,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="386c42eb4d167d87be7f7f68faf1aafce1be237e" resname="reportage" approved="yes">
         <source>reportage</source>
-        <target state="translated">Reportage</target>
+        <target state="translated">Dossier</target>
         <jms:reference-file line="209">Phrasea/Twig/PhraseanetExtension.php</jms:reference-file>
         <jms:reference-file line="225">Phrasea/Twig/PhraseanetExtension.php</jms:reference-file>
       </trans-unit>
@@ -13022,7 +13022,7 @@ Si vous recevez cet e-mail sans l'avoir sollicité, merci de l'ignorer ou de le 
       </trans-unit>
       <trans-unit id="4374aaee247fb237ce6c97d5c8d64bbe474d16de" resname="to" approved="yes">
         <source>to</source>
-        <target state="translated">to</target>
+        <target state="translated">à</target>
         <jms:reference-file line="15">web/report/report_layout_child.html.twig</jms:reference-file>
         <jms:reference-file line="19">web/report/report_layout_child.html.twig</jms:reference-file>
       </trans-unit>

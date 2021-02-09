@@ -6,11 +6,11 @@
 @import '../../_shared/styles/main';
 
 // override jquery ui theme colors:
-$uiTextContentColor: #333333;
-$uiTextTitleColor: #333333;
-$uiLinkColor: #333333;
-$uiLinkFocusColor: #333333;
-$uiLinkActiveColor: #333333;
+$uiTextContentColor: #12171d;
+$uiTextTitleColor: #12171d;
+$uiLinkColor: #12171d;
+$uiLinkFocusColor: #12171d;
+$uiLinkActiveColor: #12171d;
 $uiLinkBorderFocusColor: #c77405; //#333333;
 @import '../../_shared/styles/jquery-ui/ui-lightness';
 
@@ -18,10 +18,10 @@ $uiLinkBorderFocusColor: #c77405; //#333333;
 body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
+  background-color: #eeeff4;
   color: #333333;
   font-family: $defaultFontFamily;
-  font-size: $mediumFontSize;
+  font-size: 14px;
   overflow-y: auto;
 }
 .clear {
@@ -134,14 +134,15 @@ $mainMenuLinkBackgroundHoverColor: transparent;
 
 /******* LEFT SIDE ************************************************************/
 #left {
-  background-color: #f2f0e9;
+  background-color: #8493aa;
   overflow: auto;
 }
 #FNDR {
   overflow: auto;
 }
 #FNDR li.selected {
-  background-color: #aaa8a5;
+  background-color: transparent;
+  font-weight: 700;
   color: #ffffff;
 }
 #FNDR a {
@@ -259,7 +260,7 @@ div.switch_right.unchecked {
   background-size: 16px;
 }
 .board_section div[class="section"] ul.setup li:hover {
-  background-color: #f2f0e9;
+  background-color: #8493aa;
 }
 /******* PUBLICATIONS *********************************************************/
 #pub_icon {

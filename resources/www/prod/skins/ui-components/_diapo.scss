@@ -35,6 +35,7 @@ $diapoBorderColor: $darkerBorderColor !default;
   border-radius: $defaultBorderRadius;
   text-align: center;
   margin: 8px 5px;
+  background-color: #1b242b;
   &.selected {
     cursor: url('#{$iconsPath}cursor-move.png'), -moz-grab;
   }

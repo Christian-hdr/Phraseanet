@@ -1003,8 +1003,8 @@ function triggerShortcuts() {
         resizable: false,
         draggable: false,
         modal: true,
-        width: 600,
-        height: 400,
+        width: 1200,
+        height: 700,
         overlay: {
             backgroundColor: '#000',
             opacity: 0.7
@@ -1794,7 +1794,7 @@ function deleteThis(lst) {
     }
 
     var $dialog = p4.Dialog.Create({
-        size: '287x153',
+        size: '287x300',
         title: language.warning
     });
 
@@ -1867,7 +1867,7 @@ function feedbackThis(sstt_id, lst, story) {
 function toolREFACTOR(datas, activeTab) {
 
     var dialog = p4.Dialog.Create({
-        size: 'Medium',
+        size: 'Full',
         title: language.toolbox,
         loading: true
     });
@@ -2180,12 +2180,14 @@ function activeIcons() {
             }
         }
 
-        if (false === $.isEmptyObject(params)) {
-            var dialog = p4.Dialog.Create();
-            dialog.load('../prod/records/property/', 'GET', params);
-        } else {
-            alert(language.nodocselected);
-        }
+	if (false === $.isEmptyObject(params)) {
+	    var dialog = p4.Dialog.Create({
+		size: 'Full',
+	    });
+	    dialog.load('../prod/records/property/', 'GET', params);
+	} else {
+	    alert(language.nodocselected);
+	}
     });
 
     $container.on('click', '.TOOL_pushdoc_btn', function () {
@@ -2760,11 +2762,12 @@ function basketPrefs() {
 }
 
 function lookBox(el, event) {
+
     $("#look_box").dialog({
         closeOnEscape: true,
         resizable: false,
-        width: 450,
-        height: 500,
+        width: 1200,
+        height: 700,
         modal: true,
         draggable: false,
         overlay: {
@@ -2772,6 +2775,7 @@ function lookBox(el, event) {
             opacity: 0.7
         }
     }).dialog('open');
+    
 }
 
 function showAnswer(p) {

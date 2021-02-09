@@ -1,5 +1,5 @@
-$paginationLinkColor: $linkDefaultColor !default;
-
+$paginationLinkColor: #fff !default;
+$paginateBorderColor:#fff;
 #tool_navigate input {
   text-align: center;
 }
@@ -7,7 +7,7 @@ $paginationLinkColor: $linkDefaultColor !default;
 #tool_navigate a {
   padding: 1px 5px;
   margin: 0 4px;
-  background-color: #0077BC;
+  background-color: #03a9f5;
   border-radius: $defaultBorderRadius;
   font-size: $mediumFontSize;
   line-height: 14px;
@@ -28,14 +28,14 @@ $paginationLinkColor: $linkDefaultColor !default;
 }
 
 #paginate #tool_navigate {
-  background-color: $paginateBg1;
+  background-color: #03a9f5;
 }
 
 #paginate #tool_navigate #NEXT_PAGE:hover,
 #paginate #tool_navigate #PREV_PAGE:hover,
 #paginate #tool_navigate #last:hover,
 #paginate #tool_navigate #first:hover {
-  background-color: $highlightBackgroundColor;
+  background-color: #03a9f5;
 }
 
 #paginate #tool_navigate #NEXT_PAGE {

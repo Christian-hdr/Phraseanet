@@ -59,7 +59,8 @@ var p4 = p4 || {};
                 confirmExit: false,
                 closeCallback: false,
                 closeButton: false,
-                cancelButton: false
+                cancelButton: false,
+		closeText: "close"
             },
             options = typeof options === 'object' ? options : {},
             width,
@@ -120,6 +121,9 @@ var p4 = p4 || {};
             if ($this.closing === false) {
                 $this.closing = true;
                 $this.Close();
+		// reload de la page a chaque fermeture de modal
+		//gotopage(1);
+		
             }
         };
 
@@ -167,6 +171,7 @@ var p4 = p4 || {};
     phraseaDialog.prototype = {
         Close: function () {
             p4.Dialog.Close(this.level);
+	    gotopage(1);
         },
         setContent: function (content) {
             this.$dialog.removeClass('loading').empty().append(content);

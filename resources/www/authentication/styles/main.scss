@@ -5,3 +5,7 @@
 
 @import '../../../../www/bower_components/font-awesome/scss/font-awesome.scss';
 @import '../../../../www/bower_components/jquery-ui/themes/base/jquery.ui.autocomplete'; // not extension for inline import
+
+.alert.alert-warning {
+    background-color: #d22248;
+}

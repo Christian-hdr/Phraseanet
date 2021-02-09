@@ -31,17 +31,17 @@ class PhraseaPDF extends \TCPDF
         $this->Cell(0, 10, 'Page ' . $this->PageNo(), 0, 0, 'C');
 
         $this->SetFont(self::FONT, '', 8);
-        $w = $this->GetStringWidth('Printed by');
+        $w = $this->GetStringWidth('Généré par');
 
         $this->SetFont(self::FONT, 'B', 8);
-        $w += $this->GetStringWidth(' Phraseanet');
+        $w += $this->GetStringWidth(' Gemnet');
 
         $this->SetXY(-$w - $mr - 5, -15);
 
         $this->SetFont(self::FONT, '', 8);
-        $this->Write(8, 'Printed by');
+        $this->Write(8, 'Généré par');
 
         $this->SetFont(self::FONT, 'B', 8);
-        $this->Write(8, ' Phraseanet');
+        $this->Write(8, ' Gemnet');
     }
 }

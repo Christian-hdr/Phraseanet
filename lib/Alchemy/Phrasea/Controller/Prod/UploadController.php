@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of Phraseanet
  *
@@ -7,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Alchemy\Phrasea\Controller\Prod;
 
 use Alchemy\Phrasea\Application\Helper\BorderManagerAware;
@@ -32,8 +34,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class UploadController extends Controller
-{
+class UploadController extends Controller {
+    
+    
+
     use BorderManagerAware;
     use DataboxLoggerAware;
     use DispatcherAware;
@@ -41,16 +45,15 @@ class UploadController extends Controller
     use FilesystemAware;
     use SubDefinitionSubstituerAware;
 
-    public function getFlashUploadForm()
-    {
-        $maxFileSize = $this->getUploadMaxFileSize();
+    public function getFlashUploadForm() {
+	$maxFileSize = $this->getUploadMaxFileSize();
 
-        return $this->render('prod/upload/upload-flash.html.twig', [
-            'sessionId'           => session_id(),
-            'collections'         => $this->getGrantedCollections($this->getAclForUser()),
-            'maxFileSize'         => $maxFileSize,
-            'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
-        ]);
+	return $this->render('prod/upload/upload-flash.html.twig', [
+		    'sessionId' => session_id(),
+		    'collections' => $this->getGrantedCollections($this->getAclForUser()),
+		    'maxFileSize' => $maxFileSize,
+		    'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
+	]);
     }
 
     /**
@@ -58,26 +61,25 @@ class UploadController extends Controller
      *
      * @return integer
      */
-    private function getUploadMaxFileSize()
-    {
-        $postMaxSize = trim(ini_get('post_max_size'));
+    private function getUploadMaxFileSize() {
+	$postMaxSize = trim(ini_get('post_max_size'));
 
-        if ('' === $postMaxSize) {
-            $postMaxSize = PHP_INT_MAX;
-        }
+	if ('' === $postMaxSize) {
+	    $postMaxSize = PHP_INT_MAX;
+	}
 
-        switch (strtolower(substr($postMaxSize, -1))) {
-            /** @noinspection PhpMissingBreakStatementInspection */
-            case 'g':
-                $postMaxSize *= 1024;
-            /** @noinspection PhpMissingBreakStatementInspection */
-            case 'm':
-                $postMaxSize *= 1024;
-            case 'k':
-                $postMaxSize *= 1024;
-        }
+	switch (strtolower(substr($postMaxSize, -1))) {
+	    /** @noinspection PhpMissingBreakStatementInspection */
+	    case 'g':
+		$postMaxSize *= 1024;
+	    /** @noinspection PhpMissingBreakStatementInspection */
+	    case 'm':
+		$postMaxSize *= 1024;
+	    case 'k':
+		$postMaxSize *= 1024;
+	}
 
-        return min(UploadedFile::getMaxFilesize(), (int) $postMaxSize);
+	return min(UploadedFile::getMaxFilesize(), (int) $postMaxSize);
     }
 
     /**
@@ -87,79 +89,75 @@ class UploadController extends Controller
      *
      * @return array
      */
-    private function getGrantedCollections(\ACL $acl)
-    {
-        $collections = [];
+    private function getGrantedCollections(\ACL $acl) {
+	$collections = [];
 
-        foreach ($acl->get_granted_sbas() as $databox) {
-            $sbasId = $databox->get_sbas_id();
+	foreach ($acl->get_granted_sbas() as $databox) {
+	    $sbasId = $databox->get_sbas_id();
 
-            foreach ($acl->get_granted_base([\ACL::CANADDRECORD], [$sbasId]) as $collection) {
-                $databox = $collection->get_databox();
+	    foreach ($acl->get_granted_base([\ACL::CANADDRECORD], [$sbasId]) as $collection) {
+		$databox = $collection->get_databox();
 
-                if ( ! isset($collections[$sbasId])) {
-                    $collections[$databox->get_sbas_id()] = [
-                        'databox'             => $databox,
-                        'databox_collections' => []
-                    ];
-                }
-                $collections[$databox->get_sbas_id()]['databox_collections'][] = $collection;
+		if (!isset($collections[$sbasId])) {
+		    $collections[$databox->get_sbas_id()] = [
+			'databox' => $databox,
+			'databox_collections' => []
+		    ];
+		}
+		$collections[$databox->get_sbas_id()]['databox_collections'][] = $collection;
 
-                /** @var DisplaySettingService $settings */
-                $settings = $this->app['settings'];
-                $userOrderSetting = $settings->getUserSetting($this->app->getAuthenticatedUser(), 'order_collection_by');
+		/** @var DisplaySettingService $settings */
+		$settings = $this->app['settings'];
+		$userOrderSetting = $settings->getUserSetting($this->app->getAuthenticatedUser(), 'order_collection_by');
 
-                // a temporary array to sort the collections
-                $aName = [];
-                list($ukey, $uorder) = ["order", SORT_ASC];     // default ORDER_BY_ADMIN
-                switch ($userOrderSetting) {
-                    case $settings::ORDER_ALPHA_ASC :
-                        list($ukey, $uorder) = ["name", SORT_ASC];
-                        break;
+		// a temporary array to sort the collections
+		$aName = [];
+		list($ukey, $uorder) = ["order", SORT_ASC];     // default ORDER_BY_ADMIN
+		switch ($userOrderSetting) {
+		    case $settings::ORDER_ALPHA_ASC :
+			list($ukey, $uorder) = ["name", SORT_ASC];
+			break;
 
-                    case $settings::ORDER_ALPHA_DESC :
-                        list($ukey, $uorder) = ["name", SORT_DESC];
-                        break;
-                }
+		    case $settings::ORDER_ALPHA_DESC :
+			list($ukey, $uorder) = ["name", SORT_DESC];
+			break;
+		}
 
-                foreach ($collections[$databox->get_sbas_id()]['databox_collections'] as $key => $row) {
-                    if ($ukey == "order") {
-                        $aName[$key] = $row->get_ord();
-                    }
-                    else {
-                        $aName[$key] = $row->get_name();
-                    }
-                }
+		foreach ($collections[$databox->get_sbas_id()]['databox_collections'] as $key => $row) {
+		    if ($ukey == "order") {
+			$aName[$key] = $row->get_ord();
+		    } else {
+			$aName[$key] = $row->get_name();
+		    }
+		}
 
-                // sort the collections
-                array_multisort($aName, $uorder, SORT_REGULAR, $collections[$databox->get_sbas_id()]['databox_collections']);
-            }
-        }
+		// sort the collections
+		array_multisort($aName, $uorder, SORT_REGULAR, $collections[$databox->get_sbas_id()]['databox_collections']);
+	    }
+	}
 
-        return $collections;
+	return $collections;
     }
 
-    public function getHtml5UploadForm()
-    {
-        $maxFileSize = $this->getUploadMaxFileSize();
+    public function getHtml5UploadForm() {
+	$maxFileSize = $this->getUploadMaxFileSize();
 
-        return $this->render('prod/upload/upload.html.twig', [
-            'sessionId'           => session_id(),
-            'collections'         => $this->getGrantedCollections($this->getAclForUser()),
-            'maxFileSize'         => $maxFileSize,
-            'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
-        ]);
+	return $this->render('prod/upload/upload.html.twig', [
+		    'sessionId' => session_id(),
+		    'collections' => $this->getGrantedCollections($this->getAclForUser()),
+		    'maxFileSize' => $maxFileSize,
+		    'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
+	]);
     }
 
-    public function getUploadForm()
-    {
-        $maxFileSize = $this->getUploadMaxFileSize();
+    public function getUploadForm() {
+	$maxFileSize = $this->getUploadMaxFileSize();
 
-        return $this->render('prod/upload/upload.html.twig', [
-            'collections'         => $this->getGrantedCollections($this->getAclForUser()),
-            'maxFileSize'         => $maxFileSize,
-            'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
-        ]);
+	return $this->render('prod/upload/upload.html.twig', [
+		    'collections' => $this->getGrantedCollections($this->getAclForUser()),
+		    'maxFileSize' => $maxFileSize,
+		    'maxFileSizeReadable' => \p4string::format_octets($maxFileSize)
+	]);
     }
 
     /**
@@ -176,145 +174,174 @@ class UploadController extends Controller
      *
      * @return Response
      */
-    public function upload(Request $request)
-    {
-        $data = [
-            'success' => false,
-            'code'    => null,
-            'message' => '',
-            'element' => '',
-            'reasons' => [],
-            'id' => '',
-        ];
+    public function upload(Request $request) {
+	$data = [
+	    'success' => false,
+	    'code' => null,
+	    'message' => '',
+	    'element' => '',
+	    'reasons' => [],
+	    'id' => '',
+	];
 
-        if (null === $request->files->get('files')) {
-            throw new BadRequestHttpException('Missing file parameter');
-        }
+	if (null === $request->files->get('files')) {
+	    throw new BadRequestHttpException('Missing file parameter');
+	}
 
-        if (count($request->files->get('files')) > 1) {
-            throw new BadRequestHttpException('Upload is limited to 1 file per request');
-        }
+	if (count($request->files->get('files')) > 1) {
+	    throw new BadRequestHttpException('Upload is limited to 1 file per request');
+	}
 
-        $base_id = $request->request->get('base_id');
+	$base_id = $request->request->get('base_id');
 
-        if (!$base_id) {
-            throw new BadRequestHttpException('Missing base_id parameter');
-        }
+	if (!$base_id) {
+	    throw new BadRequestHttpException('Missing base_id parameter');
+	}
 
-        if (!$this->getAclForUser()->has_right_on_base($base_id, \ACL::CANADDRECORD)) {
-            throw new AccessDeniedHttpException('User is not allowed to add record on this collection');
-        }
+	if (!$this->getAclForUser()->has_right_on_base($base_id, \ACL::CANADDRECORD)) {
+	    throw new AccessDeniedHttpException('User is not allowed to add record on this collection');
+	}
 
-        $file = current($request->files->get('files'));
+	$file = current($request->files->get('files'));
 
-        if (!$file->isValid()) {
-            throw new BadRequestHttpException('Uploaded file is invalid');
-        }
+	if (!$file->isValid()) {
+	    throw new BadRequestHttpException('Uploaded file is invalid');
+	}
 
-        try {
-            // Add file extension, so mediavorus can guess file type for octet-stream file
-            $uploadedFilename = $file->getRealPath();
-            $renamedFilename = $file->getRealPath() . '.' . pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+	try {
+	    // Add file extension, so mediavorus can guess file type for octet-stream file
+	    $uploadedFilename = $file->getRealPath();
+	    $renamedFilename = $file->getRealPath() . '.' . pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
 
-            $this->getFilesystem()->rename($uploadedFilename, $renamedFilename);
+	    $this->getFilesystem()->rename($uploadedFilename, $renamedFilename);
 
-            $media = $this->app->getMediaFromUri($renamedFilename);
-            $collection = \collection::getByBaseId($this->app, $base_id);
+	    $media = $this->app->getMediaFromUri($renamedFilename);
+	    $collection = \collection::getByBaseId($this->app, $base_id);
 
-            $lazaretSession = new LazaretSession();
-            $lazaretSession->setUser($this->getAuthenticatedUser());
+	    $lazaretSession = new LazaretSession();
+	    $lazaretSession->setUser($this->getAuthenticatedUser());
 
-            $this->getEntityManager()->persist($lazaretSession);
+	    $this->getEntityManager()->persist($lazaretSession);
 
-            $packageFile = new File($this->app, $media, $collection, $file->getClientOriginalName());
+	    $packageFile = new File($this->app, $media, $collection, $file->getClientOriginalName());
 
-            $postStatus = $request->request->get('status');
+	    $postStatus = $request->request->get('status');
 
-            if (isset($postStatus[$collection->get_base_id()]) && is_array($postStatus[$collection->get_base_id()])) {
-                $postStatus = $postStatus[$collection->get_base_id()];
+	    if (isset($postStatus[$collection->get_base_id()]) && is_array($postStatus[$collection->get_base_id()])) {
+		$postStatus = $postStatus[$collection->get_base_id()];
 
-                $status = '';
-                foreach (range(0, 31) as $i) {
-                    $status .= isset($postStatus[$i]) ? ($postStatus[$i] ? '1' : '0') : '0';
-                }
-                $packageFile->addAttribute(new Status($this->app, strrev($status)));
-            }
+		$status = '';
+		foreach (range(0, 31) as $i) {
+		    $status .= isset($postStatus[$i]) ? ($postStatus[$i] ? '1' : '0') : '0';
+		}
+		$packageFile->addAttribute(new Status($this->app, strrev($status)));
+	    }
 
-            $forceBehavior = $request->request->get('forceAction');
+	    $forceBehavior = $request->request->get('forceAction');
 
-            $reasons = [];
-            $elementCreated = null;
+	    $reasons = [];
+	    $elementCreated = null;
 
-            $callback = function ($element, Visa $visa) use (&$reasons, &$elementCreated) {
-                foreach ($visa->getResponses() as $response) {
-                    if (!$response->isOk()) {
-                        $reasons[] = $response->getMessage($this->app['translator']);
-                    }
-                }
+	    $callback = function ($element, Visa $visa) use (&$reasons, &$elementCreated) {
+		foreach ($visa->getResponses() as $response) {
+		    if (!$response->isOk()) {
+			$reasons[] = $response->getMessage($this->app['translator']);
+		    }
+		}
 
-                $elementCreated = $element;
-            };
+		$elementCreated = $element;
+	    };
 
-            $code = $this->getBorderManager()->process( $lazaretSession, $packageFile, $callback, $forceBehavior);
+	    $code = $this->getBorderManager()->process($lazaretSession, $packageFile, $callback, $forceBehavior);
 
-            $this->getFilesystem()->rename($renamedFilename, $uploadedFilename);
+	    $this->getFilesystem()->rename($renamedFilename, $uploadedFilename);
 
-            if (!!$forceBehavior) {
-                $reasons = [];
-            }
 
-            if ($elementCreated instanceof \record_adapter) {
-                $id = $elementCreated->getId();
-                $element = 'record';
-                $message = $this->app->trans('The record was successfully created');
+	    if (!!$forceBehavior) {
+		$reasons = [];
+	    }
 
-                $this->dispatch(PhraseaEvents::RECORD_UPLOAD, new RecordEdit($elementCreated));
+	    if ($elementCreated instanceof \record_adapter) {
+		$id = $elementCreated->getId();
+		$element = 'record';
+		$message = $this->app->trans('The record was successfully created');
 
-                // try to create thumbnail from data URI
-                if ('' !== $b64Image = $request->request->get('b64_image', '')) {
-                    try {
-                        $dataUri = Parser::parse($b64Image);
+		$this->dispatch(PhraseaEvents::RECORD_UPLOAD, new RecordEdit($elementCreated));
 
-                        $fileName = $this->getTemporaryFilesystem()->createTemporaryFile('base_64_thumb', null, "png");
-                        file_put_contents($fileName, $dataUri->getData());
-                        $media = $this->app->getMediaFromUri($fileName);
+		// try to create thumbnail from data URI
+		if ('' !== $b64Image = $request->request->get('b64_image', '')) {
+		    try {
+			$dataUri = Parser::parse($b64Image);
 
-                        $this->getSubDefinitionSubstituer()->substituteSubdef($elementCreated, 'thumbnail', $media);
-                        $this->getDataboxLogger($elementCreated->getDatabox())
-                            ->log($elementCreated, \Session_Logger::EVENT_SUBSTITUTE, 'thumbnail', '');
+			$fileName = $this->getTemporaryFilesystem()->createTemporaryFile('base_64_thumb', null, "png");
+			file_put_contents($fileName, $dataUri->getData());
+			$media = $this->app->getMediaFromUri($fileName);
 
-                        unset($media);
-                        $this->getTemporaryFilesystem()->clean('base_64_thumb');
-                    } catch (DataUriException $e) {
+			$this->getSubDefinitionSubstituer()->substituteSubdef($elementCreated, 'thumbnail', $media);
+			$this->getDataboxLogger($elementCreated->getDatabox())
+				->log($elementCreated, \Session_Logger::EVENT_SUBSTITUTE, 'thumbnail', '');
 
-                    }
-                }
-            } else {
-                /** @var LazaretFile $elementCreated */
-                $this->dispatch(PhraseaEvents::LAZARET_CREATE, new LazaretEvent($elementCreated));
+			unset($media);
+			$this->getTemporaryFilesystem()->clean('base_64_thumb');
+		    } catch (DataUriException $e) {
+			
+		    }
+		}
+		/***************************************************************/
+		/************ notif à l'upload *********************************/
+		/***************************************************************/
 
-                $id = $elementCreated->getId();
-                $element = 'lazaret';
-                $message = $this->app->trans('The file was moved to the quarantine');
-            }
+		
+		$user = $this->getAuthenticatedUser()->getId();
 
-            $data = [
-                'success' => true,
-                'code'    => $code,
-                'message' => $message,
-                'element' => $element,
-                'reasons' => $reasons,
-                'id'      => $id,
-            ];
-        } catch (\Exception $e) {
-            $data['message'] = $this->app->trans('Unable to add file to Phraseanet');
-        }
+		$params = [
+		    'from' => $user,
+		    'ssel_id' => 1,
+		    'filename' => $elementCreated->get_title()
+		];
 
-        $response = $this->app->json($data);
-        // IE 7 and 8 does not correctly handle json response in file API
-        // lets send them an html content-type header
-        $response->headers->set('Content-type', 'text/html');
+		$datas = json_encode($params);
+		if ($this->getConf()->get(['registry', 'modules', 'notif-upload']) === true) {
+		    if ($user != 21 && $user != 24 && $user != 34 && $user != 30) {
+			$this->app['events-manager']->notify('21', 'eventsmanager_notify_upload', $datas, false);
+			$this->app['events-manager']->notify('24', 'eventsmanager_notify_upload', $datas, false);
+			$this->app['events-manager']->notify('34', 'eventsmanager_notify_upload', $datas, false);
+			$this->app['events-manager']->notify('30', 'eventsmanager_notify_upload', $datas, false);
+			$this->app['events-manager']->notify('1', 'eventsmanager_notify_upload', $datas, false);
+		    }
+		}
+		
+		/***************************************************************/
+		/***************************************************************/
+		
+		
+	    } else {
+		/** @var LazaretFile $elementCreated */
+		$this->dispatch(PhraseaEvents::LAZARET_CREATE, new LazaretEvent($elementCreated));
+		$id = $elementCreated->getId();
+		$element = 'lazaret';
+		$message = $this->app->trans('The file was moved to the quarantine');
+	    }
 
-        return $response;
+	    $data = [
+		'success' => true,
+		'code' => $code,
+		'message' => $message,
+		'element' => $element,
+		'reasons' => $reasons,
+		'id' => $id,
+	    ];
+	} catch (\Exception $e) {
+	    $data['message'] = $this->app->trans('Unable to add file to Phraseanet');
+	}
+
+	$response = $this->app->json($data);
+	// IE 7 and 8 does not correctly handle json response in file API
+	// lets send them an html content-type header
+	$response->headers->set('Content-type', 'text/html');
+
+	
+	return $response;
     }
+
 }
