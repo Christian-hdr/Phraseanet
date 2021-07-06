@@ -210,7 +210,7 @@ class FieldsController extends Controller
         $this->validateTagField($data);
 
         try {
-            $field = \databox_field::create($this->app, $databox, $data['name'], $data['multi']);
+            $field = \databox_field::create($this->app, $databox, $data['name']);
             $this->updateFieldWithData($field, $data);
             $field->save();
         } catch (\Exception $e) {
@@ -308,11 +308,15 @@ class FieldsController extends Controller
             ->set_business($data['business'])
             ->set_aggregable($data['aggregable'])
             ->set_indexable($data['indexable'])
+            ->set_multi($data['multi'])
             ->set_required($data['required'])
             ->set_separator($data['separator'])
             ->set_readonly($data['readonly'])
             ->set_type($data['type'])
             ->set_tbranch($data['tbranch'])
+            ->set_generate_cterms($data['generate_cterms'])
+            ->set_gui_editable($data['gui_editable'])
+            ->set_gui_visible($data['gui_visible'])
             ->set_report($data['report'])
             ->setVocabularyControl(null)
             ->setVocabularyRestricted(false);
@@ -348,7 +352,7 @@ class FieldsController extends Controller
     {
         return [
             'name', 'multi', 'thumbtitle', 'tag', 'business', 'indexable', 'aggregable',
-            'required', 'separator', 'readonly', 'type', 'tbranch', 'report',
+            'required', 'separator', 'readonly', 'gui_editable', 'gui_visible' , 'type', 'tbranch', 'generate_cterms', 'report',
             'vocabulary-type', 'vocabulary-restricted', 'dces-element', 'labels'
         ];
     }

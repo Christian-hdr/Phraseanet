@@ -14,6 +14,8 @@ use Alchemy\Phrasea\Border;
 use Alchemy\Phrasea\Border\Attribute\AttributeInterface;
 use Alchemy\Phrasea\Border\Attribute\MetaField;
 use Alchemy\Phrasea\Model\Entities\LazaretFile;
+use Alchemy\Phrasea\WorkerManager\Event\RecordsWriteMetaEvent;
+use Alchemy\Phrasea\WorkerManager\Event\WorkerEvents;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use PHPExiftool\Driver\Metadata\Metadata;
@@ -147,7 +149,8 @@ class LazaretManipulator
                 $this->app,
                 $lazaretFile->getOriginalName()
             );
-        } catch (\Exception $e) {
+        }
+        catch(\Exception $e) {
             // the file is not in tmp anymore ?
             // delete the quarantine item
             $this->denyLazaretFile($lazaretFile);
@@ -196,6 +199,7 @@ class LazaretManipulator
                         case AttributeInterface::NAME_METADATA:
                             /** @var Metadata $value */
                             $value = $attribute->getValue();
+                            // $metadataBag->set($value->getTag()->getTagname(), new Metadata($value->getTag(), $value->getValue()));
                             $metadataBag->set($value->getTag()->getTagname(), $value);
                             break;
                         case AttributeInterface::NAME_STORY:
@@ -218,11 +222,17 @@ class LazaretManipulator
 
                 $fields = $metaFields->toMetadataArray($record->getDatabox()->get_meta_structure());
                 $record->set_metadatas($fields);
+
+                // order to write meta in file
+                $this->app['dispatcher']->dispatch(WorkerEvents::RECORDS_WRITE_META,
+                    new RecordsWriteMetaEvent([$record->getRecordId()], $record->getDataboxId()));
             }
 
             //Delete lazaret file
             $this->entityManager->remove($lazaretFile);
             $this->entityManager->flush();
+
+            $ret['result']['record_id'] = $record->getRecordId();
 
             $ret['success'] = true;
         } catch (\Exception $e) {

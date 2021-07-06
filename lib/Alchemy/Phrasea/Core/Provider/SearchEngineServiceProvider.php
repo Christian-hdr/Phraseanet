@@ -11,15 +11,13 @@
 
 namespace Alchemy\Phrasea\Core\Provider;
 
-use Alchemy\Phrasea\Controller\LazyLocator;
+use Alchemy\Phrasea\Core\LazyLocator;
 use Alchemy\Phrasea\SearchEngine\Elastic\DataboxFetcherFactory;
 use Alchemy\Phrasea\SearchEngine\Elastic\ElasticsearchOptions;
 use Alchemy\Phrasea\SearchEngine\Elastic\Index;
 use Alchemy\Phrasea\SearchEngine\Elastic\IndexLocator;
 use Alchemy\Phrasea\SearchEngine\Elastic\Search\QueryVisitor;
 use Alchemy\Phrasea\SearchEngine\SearchEngineLogger;
-use Alchemy\Phrasea\Exception\InvalidArgumentException;
-use Alchemy\Phrasea\SearchEngine\SearchEngineInterface;
 use Alchemy\Phrasea\SearchEngine\Elastic\ElasticSearchEngine;
 use Alchemy\Phrasea\SearchEngine\Elastic\Indexer;
 use Alchemy\Phrasea\SearchEngine\Elastic\IndexerSubscriber;
@@ -30,8 +28,9 @@ use Alchemy\Phrasea\SearchEngine\Elastic\Search\Escaper;
 use Alchemy\Phrasea\SearchEngine\Elastic\Search\FacetsResponse;
 use Alchemy\Phrasea\SearchEngine\Elastic\Search\QueryContextFactory;
 use Alchemy\Phrasea\SearchEngine\Elastic\Search\QueryCompiler;
-use Alchemy\Phrasea\SearchEngine\Elastic\Structure\GlobalStructure;
 use Alchemy\Phrasea\SearchEngine\Elastic\Thesaurus;
+use Alchemy\Phrasea\SearchEngine\SearchEngineStructure;
+// use Alchemy\Phrasea\Utilities\Stopwatch;
 use Elasticsearch\ClientBuilder;
 use Hoa\Compiler;
 use Hoa\File;
@@ -43,10 +42,14 @@ use Silex\ServiceProviderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+use \Alchemy\Phrasea\Application as PhraseaApplication;
+
+
 class SearchEngineServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
+        /** @var PhraseaApplication $app */
         $this->registerElasticSearchClient($app);
         $this->registerQueryParser($app);
         $this->registerIndexer($app);
@@ -58,46 +61,63 @@ class SearchEngineServiceProvider implements ServiceProviderInterface
     }
 
     /**
-     * @param Application $app
+     * @param  PhraseaApplication $app
      * @return Application
      */
-    private function registerSearchEngine(Application $app)
+    private function registerSearchEngine(PhraseaApplication $app)
     {
         $app['phraseanet.SE'] = function ($app) {
             return $app['search_engine'];
         };
 
-        $app['phraseanet.SE.logger'] = $app->share(function (Application $app) {
+        $app['phraseanet.SE.logger'] = $app->share(function (PhraseaApplication $app) {
             return new SearchEngineLogger($app);
         });
 
         $app['search_engine'] = $app->share(function ($app) {
-            $type = $app['conf']->get(['main', 'search-engine', 'type']);
-            if ($type !== SearchEngineInterface::TYPE_ELASTICSEARCH) {
-                throw new InvalidArgumentException(sprintf('Invalid search engine type "%s".', $type));
-            }
-            /** @var ElasticsearchOptions $options */
-            $options = $app['elasticsearch.options'];
+//            $stopwatch = new Stopwatch("se");
+
+//            $stopwatch->lap("se.options");
+//            $r = new ElasticSearchEngine(
+//                $app,
+//                $app['search_engine.global_structure'],
+//                $app['elasticsearch.client'],
+//                $app['query_context.factory'],
+//                $app['elasticsearch.facets_response.factory'],
+//                $app['elasticsearch.options']
+//            );
+//            $stopwatch->lap("se.new");
+//            $stopwatch->log();
+//            return $r;
 
             return new ElasticSearchEngine(
                 $app,
-                $app['search_engine.structure'],
+                $app['search_engine.global_structure'],
                 $app['elasticsearch.client'],
-                $options->getIndexName(),
                 $app['query_context.factory'],
                 $app['elasticsearch.facets_response.factory'],
-                $options
+                $app['elasticsearch.options']
             );
         });
 
-        $app['search_engine.structure'] = $app->share(function (\Alchemy\Phrasea\Application $app) {
-            $databoxes = $app->getDataboxes();
-
-            return GlobalStructure::createFromDataboxes($databoxes);
+        $app['search_engine.structure'] = $app->share(function (PhraseaApplication $app) {
+            return new SearchEngineStructure($app['cache']);
         });
 
-        $app['elasticsearch.facets_response.factory'] = $app->protect(function (array $response) use ($app) {
-            return new FacetsResponse(new Escaper(), $response, $app['search_engine.structure']);
+        $app['search_engine.global_structure'] = $app->share(function (PhraseaApplication $app) {
+//            $stopwatch = new Stopwatch("se.global_structure");
+            /** @var SearchEngineStructure $s */
+            $s = $app['search_engine.structure'];
+
+//            $globalStructure = $s->getGlobalStructureFromDataboxes($app->getDataboxes());
+//            $stopwatch->log();
+//            return $globalStructure;
+
+            return $s->getGlobalStructureFromDataboxes($app->getDataboxes());
+        });
+
+       $app['elasticsearch.facets_response.factory'] = $app->protect(function (array $response) use ($app) {
+            return new FacetsResponse($app['elasticsearch.options'], new Escaper(), $response, $app['search_engine.global_structure']);
         });
 
         return $app;
@@ -115,7 +135,7 @@ class SearchEngineServiceProvider implements ServiceProviderInterface
         });
 
         $app['elasticsearch.index.record'] = $app->share(function ($app) {
-            return new Indexer\RecordIndex($app['search_engine.structure'], array_keys($app['locales.available']));
+            return new Indexer\RecordIndex($app['search_engine.global_structure'], array_keys($app['locales.available']));
         });
 
         $app['elasticsearch.index.term'] = $app->share(function ($app) {
@@ -145,10 +165,11 @@ class SearchEngineServiceProvider implements ServiceProviderInterface
 
         $app['elasticsearch.indexer.databox_fetcher_factory'] = $app->share(function ($app) {
             return new DataboxFetcherFactory(
+                $app['conf'],
                 $app['elasticsearch.record_helper'],
                 $app['elasticsearch.options'],
                 $app,
-                'search_engine.structure',
+                'search_engine.global_structure',
                 'thesaurus'
             );
         });
@@ -220,7 +241,7 @@ class SearchEngineServiceProvider implements ServiceProviderInterface
 
             $clientBuilder = ClientBuilder::create()
                 ->setHosts($clientParams['hosts']);
-            if (array_key_exists('logObject', $clientParams)) {
+            if(array_key_exists('logObject', $clientParams)) {
                 $clientBuilder->setLogger($clientParams['logObject']);
             }
 
@@ -228,7 +249,8 @@ class SearchEngineServiceProvider implements ServiceProviderInterface
         });
 
         $app['elasticsearch.options'] = $app->share(function ($app) {
-            $options = ElasticsearchOptions::fromArray($app['conf']->get(['main', 'search-engine', 'options'], []));
+            $conf = $app['conf']->get(['main', 'search-engine', 'options'], []);
+            $options = ElasticsearchOptions::fromArray($conf);
 
             if (empty($options->getIndexName())) {
                 $options->setIndexName(strtolower(sprintf('phraseanet_%s', str_replace(
@@ -265,7 +287,7 @@ class SearchEngineServiceProvider implements ServiceProviderInterface
 
         $app['query_context.factory'] = $app->share(function ($app) {
             return new QueryContextFactory(
-                $app['search_engine.structure'],
+                $app['search_engine.global_structure'],
                 array_keys($app['locales.available']),
                 $app['locale']
             );
@@ -286,7 +308,7 @@ class SearchEngineServiceProvider implements ServiceProviderInterface
         });
 
         $app['query_visitor.factory'] = $app->protect(function () use ($app) {
-            return new QueryVisitor($app['search_engine.structure']);
+            return new QueryVisitor($app['search_engine.global_structure']);
         });
 
         $app['query_compiler'] = $app->share(function ($app) {

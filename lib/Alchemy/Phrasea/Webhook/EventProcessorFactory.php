@@ -9,14 +9,16 @@ use Alchemy\Phrasea\Webhook\Processor\CallableProcessorFactory;
 use Alchemy\Phrasea\Webhook\Processor\FeedEntryProcessorFactory;
 use Alchemy\Phrasea\Webhook\Processor\OrderNotificationProcessorFactory;
 use Alchemy\Phrasea\Webhook\Processor\ProcessorFactory;
+use Alchemy\Phrasea\Webhook\Processor\ProcessorInterface;
 use Alchemy\Phrasea\Webhook\Processor\UserDeletedProcessorFactory;
 use Alchemy\Phrasea\Webhook\Processor\UserRegistrationProcessorFactory;
+use Alchemy\Phrasea\Webhook\Processor\SubdefEventProcessor;
 
 class EventProcessorFactory
 {
 
     /**
-     * @var ProcessorFactory
+     * @var ProcessorFactory[]
      */
     private $processorFactories = [];
 
@@ -28,7 +30,10 @@ class EventProcessorFactory
         $this->registerFactory(WebhookEvent::FEED_ENTRY_TYPE, new FeedEntryProcessorFactory($app));
         $this->registerFactory(WebhookEvent::USER_REGISTRATION_TYPE, new UserRegistrationProcessorFactory($app));
         $this->registerFactory(WebhookEvent::ORDER_TYPE, new OrderNotificationProcessorFactory($app));
-        $this->registerFactory(WebhookEvent::USER_DELETED_TYPE, new UserDeletedProcessorFactory($app));
+        $this->registerFactory(WebhookEvent::USER_DELETED_TYPE, new UserDeletedProcessorFactory());
+        $this->registerCallableFactory(WebhookEvent::RECORD_SUBDEF_TYPE, function () {
+            return new SubdefEventProcessor();
+        });
     }
 
     /**
@@ -42,7 +47,7 @@ class EventProcessorFactory
 
     /**
      * @param string $eventType
-     * @param callback|callable $callable
+     * @param callback|callable|\Closure $callable
      */
     public function registerCallableFactory($eventType, $callable)
     {
@@ -59,10 +64,20 @@ class EventProcessorFactory
     /**
      * @param WebhookEvent $event
      * @return Processor\ProcessorInterface
+     * @deprecated Use getProcessor() instead
      */
     public function get(WebhookEvent $event)
     {
-        if (! isset($this->processorFactories[$event->getType()])) {
+        return $this->getProcessor($event);
+    }
+
+    /**
+     * @param WebhookEvent $event
+     * @return ProcessorInterface
+     */
+    public function getProcessor(WebhookEvent $event)
+    {
+        if (!isset($this->processorFactories[$event->getType()])) {
             throw new \RuntimeException(sprintf('No processor found for %s', $event->getType()));
         }
 

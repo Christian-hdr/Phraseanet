@@ -19,6 +19,7 @@ use Doctrine\DBAL\Driver\Connection as DriverConnection;
 class TitleHydrator implements HydratorInterface
 {
     private $connection;
+
     /** @var RecordHelper */
     private $helper;
 
@@ -31,21 +32,21 @@ class TitleHydrator implements HydratorInterface
     public function hydrateRecords(array &$records)
     {
         $sql = "SELECT\n"
-             . "m.`record_id`,\n"
-             . "   CASE ms.`thumbtitle`\n"
-             . "     WHEN '1' THEN 'default'\n"
-             . "     WHEN '0' THEN 'default'\n"
-             . "     ELSE ms.`thumbtitle`\n"
-             . "   END AS locale,\n"
-             . "   CASE ms.`thumbtitle`\n"
-             . "     WHEN '0' THEN r.`originalname`\n"
-             . "     ELSE GROUP_CONCAT(m.`value` ORDER BY ms.`thumbtitle`, ms.`sorter` SEPARATOR ' - ')\n"
-             . "   END AS title\n"
-             . "FROM metadatas AS m FORCE INDEX(`record_id`)\n"
-             . "STRAIGHT_JOIN metadatas_structure AS ms ON (ms.`id` = m.`meta_struct_id`)\n"
-             . "STRAIGHT_JOIN record AS r ON (r.`record_id` = m.`record_id`)\n"
-             . "WHERE m.`record_id` IN (?)\n"
-             . "GROUP BY m.`record_id`, ms.`thumbtitle`\n";
+            . "m.`record_id`,\n"
+            . "   CASE ms.`thumbtitle`\n"
+            . "     WHEN '1' THEN 'default'\n"
+            . "     WHEN '0' THEN 'default'\n"
+            . "     ELSE ms.`thumbtitle`\n"
+            . "   END AS locale,\n"
+            . "   CASE ms.`thumbtitle`\n"
+            . "     WHEN '0' THEN r.`originalname`\n"
+            . "     ELSE GROUP_CONCAT(m.`value` ORDER BY ms.`thumbtitle`, ms.`sorter` SEPARATOR ' - ')\n"
+            . "   END AS title\n"
+            . "FROM metadatas AS m FORCE INDEX(`record_id`)\n"
+            . "STRAIGHT_JOIN metadatas_structure AS ms ON (ms.`id` = m.`meta_struct_id`)\n"
+            . "STRAIGHT_JOIN record AS r ON (r.`record_id` = m.`record_id`)\n"
+            . "WHERE m.`record_id` IN (?)\n"
+            . "GROUP BY m.`record_id`, ms.`thumbtitle`\n";
 
         $statement = $this->connection->executeQuery(
             $sql,

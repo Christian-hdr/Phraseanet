@@ -55,6 +55,7 @@ use Alchemy\Phrasea\Form\Login\PhraseaAuthenticationForm;
 use Alchemy\Phrasea\Form\Login\PhraseaForgotPasswordForm;
 use Alchemy\Phrasea\Form\Login\PhraseaRecoverPasswordForm;
 use Alchemy\Phrasea\Form\Login\PhraseaRegisterForm;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Neutron\ReCaptcha\ReCaptcha;
 use RandomLib\Generator;
@@ -153,7 +154,7 @@ class LoginController extends Controller
             'great'                     => $this->app->trans('Great'),
         ]);
 
-        $response->setExpires(new \DateTime('+1 day'));
+        $response->setExpires(new DateTime('+1 day'));
 
         return $response;
     }
@@ -232,6 +233,7 @@ class LoginController extends Controller
                     $registrationService = $this->getRegistrationService();
                     $providerId = isset($data['provider-id']) ? $data['provider-id'] : null;
                     $selectedCollections = isset($data['collections']) ? $data['collections'] : null;
+                    $data['email'] = trim($data['email']);
 
                     $user = $registrationService->registerUser($data, $selectedCollections, $providerId);
 
@@ -265,7 +267,7 @@ class LoginController extends Controller
         return $this->render('login/register-classic.html.twig', array_merge(
             $this->getDefaultTemplateVariables($request),
             [
-                'geonames_server_uri' => str_replace(sprintf('%s:', parse_url($url, PHP_URL_SCHEME)), '', $url),
+                'geonames_server_uri' => $url,
                 'form' => $form->createView()
             ]));
     }
@@ -552,6 +554,7 @@ class LoginController extends Controller
         } while (null !== $this->getUserRepository()->findOneBy(['login' => $login]));
 
         $user = $this->getUserManipulator()->createUser($login, $this->getStringGenerator()->generateString(128));
+        $user->setGuest(true);
         $invite_user = $this->getUserRepository()->findByLogin(User::USER_GUEST);
 
         $usr_base_ids = array_keys($this->getAclForUser($user)->get_granted_base());
@@ -591,25 +594,41 @@ class LoginController extends Controller
     // move this in an event
     public function postAuthProcess(Request $request, User $user)
     {
-        $date = new \DateTime('+' . (int) $this->getConf()->get(['registry', 'actions', 'validation-reminder-days']) . ' days');
+        $date = new DateTime('+' . (int) $this->getConf()->get(['registry', 'actions', 'validation-reminder-time-left-percent']) . ' days');
         $manager = $this->getEntityManager();
 
+        /*
+         * PHRAS-3214_validation-tokens-refacto : This code is moved to console command "SendValidationRemindersCommand.php"
+         *
         foreach ($this->getValidationParticipantRepository()->findNotConfirmedAndNotRemindedParticipantsByExpireDate($date) as $participant) {
             $validationSession = $participant->getSession();
             $basket = $validationSession->getBasket();
 
-            if (null === $token = $this->getTokenRepository()->findValidationToken($basket, $participant->getUser())) {
-                continue;
+            // find the token if exists
+            // nb : a validation may have not generated tokens if forcing auth was required upon creation
+            try {
+                $token = $this->getTokenRepository()->findValidationToken($basket, $participant->getUser());
+            }
+            catch (\Exception $e) {
+                // not unique token ? should not happen
+                $token = null;
             }
 
-            $url = $this->app->url('lightbox_validation', ['basket' => $basket->getId(), 'LOG' => $token->getValue()]);
+            if(!is_null($token)) {
+                $url = $this->app->url('lightbox_validation', ['basket' => $basket->getId(), 'LOG' => $token->getValue()]);
+            }
+            else {
+                $url = $this->app->url('lightbox_validation', ['basket' => $basket->getId()]);
+            }
+
             $this->dispatch(PhraseaEvents::VALIDATION_REMINDER, new ValidationEvent($participant, $basket, $url));
 
-            $participant->setReminded(new \DateTime('now'));
+            $participant->setReminded(new DateTime('now'));
             $manager->persist($participant);
         }
 
         $manager->flush();
+        */
 
         $session = $this->getAuthenticator()->openAccount($user);
 

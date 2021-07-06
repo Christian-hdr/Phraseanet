@@ -16,22 +16,23 @@ class FieldMapping
 
     const DATE_FORMAT_MYSQL = 'yyyy-MM-dd HH:mm:ss';
     const DATE_FORMAT_CAPTION = 'yyyy/MM/dd'; // ES format
-    const DATE_FORMAT_MYSQL_OR_CAPTION = 'yyyy-MM-dd HH:mm:ss||yyyy/MM/dd';
-    const DATE_FORMAT_CAPTION_PHP = 'Y/m/d';  // PHP format
+    const DATE_FORMAT_MYSQL_OR_CAPTION = 'yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM||yyyy';
 
     // Core types
-    const TYPE_STRING  = 'string';
-    const TYPE_BOOLEAN = 'boolean';
-    const TYPE_DATE    = 'date';
+    const TYPE_STRING     = 'string';
+    const TYPE_BOOLEAN    = 'boolean';
+    const TYPE_DATE       = 'date';
+    const TYPE_COMPLETION = 'completion';
 
     // Number core types
-    const TYPE_FLOAT   = 'float';
-    const TYPE_DOUBLE  = 'double';
-    const TYPE_INTEGER = 'integer';
-    const TYPE_LONG    = 'long';
-    const TYPE_SHORT   = 'short';
-    const TYPE_BYTE    = 'byte';
-    const TYPE_IP      = 'ip';
+    const TYPE_FLOAT     = 'float';
+    const TYPE_DOUBLE    = 'double';
+    const TYPE_INTEGER   = 'integer';
+    const TYPE_LONG      = 'long';
+    const TYPE_SHORT     = 'short';
+    const TYPE_BYTE      = 'byte';
+    const TYPE_IP        = 'ip';
+    const TYPE_GEO_POINT = 'geo_point';
 
     // Compound types
     const TYPE_OBJECT  = 'object';
@@ -47,7 +48,9 @@ class FieldMapping
         self::TYPE_SHORT,
         self::TYPE_BYTE,
         self::TYPE_IP,
-        self::TYPE_OBJECT
+        self::TYPE_GEO_POINT,
+        self::TYPE_OBJECT,
+        self::TYPE_COMPLETION
     );
 
     /**

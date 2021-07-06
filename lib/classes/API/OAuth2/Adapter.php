@@ -537,7 +537,11 @@ class API_OAuth2_Adapter extends OAuth2
 
     public function verifyAccessToken($scope = null, $exit_not_present = true, $exit_invalid = true, $exit_expired = true, $exit_scope = true, $realm = null)
     {
-        $token_param = $this->getAccessTokenParams();
+        $apiTokenHeader = $this->app['conf']->get(['registry', 'api-clients', 'api-auth-token-header-only']);
+
+        $useTokenHeader = $this->useTokenHeaderChoice($apiTokenHeader);
+
+        $token_param = $this->getAccessTokenParams($useTokenHeader);
 
         // Access token was not provided
         if ($token_param === false) {
@@ -806,6 +810,21 @@ class API_OAuth2_Adapter extends OAuth2
             return false;
         } catch (\Exception $e) {
             return false;
+        }
+    }
+
+    /**
+     * Get the correct constante to call on Oauth2
+     *
+     * @param $apiTokenHeaderOnly
+     * @return string
+     */
+    private function useTokenHeaderChoice($apiTokenHeaderOnly)
+    {
+        if ($apiTokenHeaderOnly === true) {
+            return Oauth2::TOKEN_ONLY_IN_HEADER;
+        } else {
+            return Oauth2::TOKEN_AUTO_FIND;
         }
     }
 }

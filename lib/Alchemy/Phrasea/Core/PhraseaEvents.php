@@ -48,10 +48,13 @@ final class PhraseaEvents
     const BRIDGE_UPLOAD_FAILURE = 'bridge.upload-failure';
 
     const EXPORT_MAIL_FAILURE = 'export.mail-failure';
-    const EXPORT_CREATE = 'export.create';
+    const EXPORT_CREATE       = 'export.create';
+    const EXPORT_MAIL_CREATE  = 'export.mail-create';
 
     const RECORD_EDIT = 'record.edit';
     const RECORD_UPLOAD = 'record.upload';
+
+    const RECORD_AUTO_SUBTITLE = 'record.auto-subtitle';
 
     const THESAURUS_IMPORTED = 'thesaurus.imported';
     const THESAURUS_FIELD_LINKED = 'thesaurus.field-linked';

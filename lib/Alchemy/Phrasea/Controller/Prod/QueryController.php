@@ -12,19 +12,110 @@ namespace Alchemy\Phrasea\Controller\Prod;
 use Alchemy\Phrasea\Application;
 use Alchemy\Phrasea\Application\Helper\SearchEngineAware;
 use Alchemy\Phrasea\Cache\Exception;
+use Alchemy\Phrasea\Collection\Reference\CollectionReference;
 use Alchemy\Phrasea\Controller\Controller;
 use Alchemy\Phrasea\Core\Configuration\DisplaySettingService;
-use Alchemy\Phrasea\SearchEngine\Elastic\ElasticsearchOptions;
 use Alchemy\Phrasea\Model\Entities\ElasticsearchRecord;
+use Alchemy\Phrasea\SearchEngine\Elastic\ElasticsearchOptions;
+use Alchemy\Phrasea\SearchEngine\Elastic\Search\QueryContextFactory;
+use Alchemy\Phrasea\SearchEngine\Elastic\Structure\Structure;
+use Alchemy\Phrasea\SearchEngine\Elastic\ElasticSearchEngine;
+use Alchemy\Phrasea\SearchEngine\Elastic\Structure\GlobalStructure;
 use Alchemy\Phrasea\SearchEngine\SearchEngineOptions;
 use Alchemy\Phrasea\SearchEngine\SearchEngineResult;
 use Alchemy\Phrasea\Utilities\StringHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use unicode;
 
 class QueryController extends Controller
 {
     use SearchEngineAware;
+
+    public function completion(Request $request)
+    {
+        /** @var unicode $unicode */
+        $query = (string) $request->request->get('fake_qry');
+        $selStart = (int) $request->request->get('_selectionStart');
+        $selEnd   = (int) $request->request->get('_selectionEnd');
+
+        // move the selection back to find the begining of the "word"
+        for(;;) {
+            $c = '';
+            if($selStart>0) {
+                $c = mb_substr($query, $selStart-1, 1);
+            }
+            if(in_array($c, ['', ' ', '"'])) {
+                break;
+            }
+            $selStart--;
+        }
+
+        // move the selection up to find the end of the "word"
+        for(;;) {
+            $c = mb_substr($query, $selEnd, 1);
+            if(in_array($c, ['', ' ', '"'])) {
+                break;
+            }
+            $selEnd++;
+        }
+        $before = mb_substr($query, 0, $selStart);
+        $word = mb_substr($query, $selStart, $selEnd-$selStart);
+        $after = mb_substr($query, $selEnd);
+
+        // since the query comes from a submited form, normalize crlf,cr,lf ...
+        $word = StringHelper::crlfNormalize($word);
+        $options = SearchEngineOptions::fromRequest($this->app, $request);
+
+        $search_engine_structure = $this->app['search_engine.global_structure'];
+
+        $query_context_factory = new QueryContextFactory(
+            $search_engine_structure,
+            array_keys($this->app['locales.available']),
+            $this->app['locale']
+        );
+
+        $engine = new ElasticSearchEngine(
+            $this->app,
+            $search_engine_structure,
+            $this->app['elasticsearch.client'],
+            $query_context_factory,
+            $this->app['elasticsearch.facets_response.factory'],
+            $this->app['elasticsearch.options']
+        );
+
+        $autocomplete = $engine->autocomplete($word, $options);
+
+        $completions = [];
+        foreach($autocomplete['text'] as $text) {
+            $completions[] = [
+                'label' => $text,
+                'value' => [
+                    'before' => $before,
+                    'word' => $word,
+                    'after' => $after,
+                    'completion' => $text,
+                    'completed' => $before . $text . $after
+                ]
+            ];
+        }
+        foreach($autocomplete['byField'] as $fieldName=>$values) {
+            foreach($values as $value) {
+                $completions[] = [
+                    'label' => $value['query'],
+                    'value' => [
+                        'before' => $before,
+                        'word' => $word,
+                        'after' => $after,
+                        'completion' => $value['query'],
+                        'completed' => $before . $value['query'] . $after
+                    ]
+                ];
+            }
+        }
+
+        return $this->app->json($completions);
+    }
 
     /**
      * Query Phraseanet to fetch records
@@ -67,17 +158,40 @@ class QueryController extends Controller
             $result = $engine->query($query, $options);
 
             if ($this->getSettings()->getUserSetting($user, 'start_page') === 'LAST_QUERY') {
-                $userManipulator->setUserSetting($user, 'start_page_query', $query);
+                // try to save the "fulltext" query which will be restored on next session
+                try {
+                    // local code to find "FULLTEXT" value from jsonQuery
+                    $findFulltext = function($clause) use(&$findFulltext) {
+                        if(array_key_exists('_ux_zone', $clause) && $clause['_ux_zone']=='FULLTEXT') {
+                            return $clause['value'];
+                        }
+                        if($clause['type']=='CLAUSES') {
+                            foreach($clause['clauses'] as $c) {
+                                if(($r = $findFulltext($c)) !== null) {
+                                    return $r;
+                                }
+                            }
+                        }
+                        return null;
+                    };
+
+                    $userManipulator->setUserSetting($user, 'last_jsonquery', (string)$request->request->get('jsQuery'));
+                    $jsQuery = @json_decode((string)$request->request->get('jsQuery'), true);
+                    if(($ft = $findFulltext($jsQuery['query'])) !== null) {
+                        $userManipulator->setUserSetting($user, 'start_page_query', $ft);
+                    }
+                }
+                catch(\Exception $e) {
+                    // no-op
+                }
             }
 
-            foreach ($options->getDataboxes() as $databox) {
-                $collections = array_map(function (\collection $collection) {
-                    return $collection->get_coll_id();
-                }, array_filter($options->getCollections(), function (\collection $collection) use ($databox) {
-                    return $collection->get_databox()->get_sbas_id() == $databox->get_sbas_id();
-                }));
-
-                $this->getSearchEngineLogger()->log($databox, $result->getQueryText(), $result->getTotal(), $collections);
+            // log array of collectionIds (from $options) for each databox
+            $collectionsReferencesByDatabox = $options->getCollectionsReferencesByDatabox();
+            foreach ($collectionsReferencesByDatabox as $sbid => $references) {
+                $databox = $this->findDataboxById($sbid);
+                $collectionsIds = array_map(function(CollectionReference $ref){return $ref->getCollectionId();}, $references);
+                $this->getSearchEngineLogger()->log($databox, $result->getQueryText(), $result->getTotal(), $collectionsIds);
             }
 
             $proposals = $firstPage ? $result->getProposals() : false;
@@ -97,48 +211,48 @@ class QueryController extends Controller
                 if (min($d2top, $d2bottom) < 4) {
                     if ($d2bottom < 4) {
                         if($page != 1){
-                            $string .= "<a id='PREV_PAGE' class='btn btn-primary btn-mini'></a>";
+                            $string .= "<a id='PREV_PAGE' class='btn btn-primary btn-mini icon-baseline-chevron_left-24px'></a>";
                         }
                         for ($i = 1; ($i <= 4 && (($i <= $npages) === true)); $i++) {
                             if ($i == $page)
-                                $string .= '<input onkeypress="if(event.keyCode == 13 && !isNaN(parseInt(this.value)))gotopage(parseInt(this.value))" type="text" value="' . $i . '" size="' . (strlen((string) $i)) . '" class="btn btn-mini" />';
+                                $string .= '<input type="text" value="' . $i . '" size="' . (strlen((string) $i)) . '" class="btn btn-mini search-navigate-input-action" data-initial-value="' . $i . '" data-total-pages="'.$npages.'"/>';
                             else
-                                $string .= "<a onclick='gotopage(" . $i . ");return false;' class='btn btn-primary btn-mini'>" . $i . "</a>";
+                                $string .= '<a class="btn btn-primary btn-mini search-navigate-action" data-page="'.$i.'">' . $i . '</a>';
                         }
                         if ($npages > 4)
-                            $string .= "<a id='NEXT_PAGE' class='btn btn-primary btn-mini'></a>";
-                        $string .= "<a onclick='gotopage(" . ($npages) . ");return false;' class='btn btn-primary btn-mini' id='last'></a>";
+                            $string .= "<a id='NEXT_PAGE' class='btn btn-primary btn-mini icon icon-baseline-chevron_right-24px'></a>";
+                        $string .= '<a href="#" class="btn btn-primary btn-mini search-navigate-action icon icon-double-arrows" data-page="' . $npages . '" id="last"></a>';
                     } else {
                         $start = $npages - 4;
                         if (($start) > 0){
-                            $string .= "<a onclick='gotopage(1);return false;' class='btn btn-primary btn-mini' id='first'></a>";
-                            $string .= "<a id='PREV_PAGE' class='btn btn-primary btn-mini'></a>";
+                            $string .= '<a class="btn btn-primary btn-mini search-navigate-action" data-page="1" id="first"><span class="icon icon-double-arrows icon-inverse"></span></a>';
+                            $string .= '<a id="PREV_PAGE" class="btn btn-primary btn-mini icon icon-baseline-chevron_left-24px"></a>';
                         }else
                             $start = 1;
                         for ($i = ($start); $i <= $npages; $i++) {
                             if ($i == $page)
-                                $string .= '<input onkeypress="if(event.keyCode == 13 && !isNaN(parseInt(this.value)))gotopage(parseInt(this.value))" type="text" value="' . $i . '" size="' . (strlen((string) $i)) . '" class="btn btn-mini" />';
+                                $string .= '<input type="text" value="' . $i . '" size="' . (strlen((string) $i)) . '" class="btn btn-mini search-navigate-input-action" data-initial-value="' . $i . '" data-total-pages="'.$npages.'" />';
                             else
-                                $string .= "<a onclick='gotopage(" . $i . ");return false;' class='btn btn-primary btn-mini'>" . $i . "</a>";
+                                $string .= '<a class="btn btn-primary btn-mini search-navigate-action" data-page="'.$i.'">' . $i . '</a>';
                         }
                         if($page < $npages){
-                            $string .= "<a id='NEXT_PAGE' class='btn btn-primary btn-mini'></a>";
+                            $string .= "<a id='NEXT_PAGE' class='btn btn-primary btn-mini icon icon-baseline-chevron_right-24px'></a>";
                         }
                     }
                 } else {
-                    $string .= "<a onclick='gotopage(1);return false;' class='btn btn-primary btn-mini' id='first'></a>";
+                    $string .= '<a class="btn btn-primary btn-mini search-navigate-action" data-page="1" id="first"><span class="icon icon-double-arrows icon-inverse"></span></a>';
 
                     for ($i = ($page - 2); $i <= ($page + 2); $i++) {
                         if ($i == $page)
-                            $string .= '<input onkeypress="if(event.keyCode == 13 && !isNaN(parseInt(this.value)))gotopage(parseInt(this.value))" type="text" value="' . $i . '" size="' . (strlen((string) $i)) . '" class="btn btn-mini" />';
+                            $string .= '<input type="text" value="' . $i . '" size="' . (strlen((string) $i)) . '" class="btn btn-mini search-navigate-input-action" data-initial-value="' . $i . '" data-total-pages="'.$npages.'" />';
                         else
-                            $string .= "<a onclick='gotopage(" . $i . ");return false;' class='btn btn-primary btn-mini'>" . $i . "</a>";
+                            $string .= '<a class="btn btn-primary btn-mini search-navigate-action" data-page="'.$i.'">' . $i . '</a>';
                     }
 
-                    $string .= "<a onclick='gotopage(" . ($npages) . ");return false;' class='btn btn-primary btn-mini' id='last'></a>";
+                    $string .= '<a href="#" class="btn btn-primary btn-mini search-navigate-action icon icon-double-arrows" data-page="' . $npages . '" id="last"></a>';
                 }
             }
-            $string .= '<div style="display:none;"><div id="NEXT_PAGE"></div><div id="PREV_PAGE"></div></div>';
+            $string .= '<div style="display:none;"><div id="NEXT_PAGE" class="icon icon-baseline-chevron_right-24px"></div><div id="PREV_PAGE" class="icon icon-baseline-chevron_left-24px"></div></div>';
 
             $explain = $this->render(
                 "prod/results/infos.html.twig",
@@ -152,8 +266,54 @@ class QueryController extends Controller
 
             $infoResult = '<div id="docInfo">'
                 . $this->app->trans('%number% documents<br/>selectionnes', ['%number%' => '<span id="nbrecsel"></span>'])
-                . '</div><a href="#" class="infoDialog" infos="' . str_replace('"', '&quot;', $explain) . '">'
-                . $this->app->trans('%total% reponses', ['%total%' => '<span>'.$result->getTotal().'</span>']) . '</a>';
+                . '<div class="detailed_info_holder"><img src="/assets/common/images/icons/dots.png" class="image-normal hidden"><img src="/assets/common/images/icons/dots-darkgreen-hover.png" class="image-hover">'
+                . '<div class="detailed_info">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nb</th>
+                                <th>Type</th>
+                                <th>File size</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Audio</td>
+                                <td>1 Mb</td>
+                                <td>00:04:31</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Documents</td>
+                                <td>20 Kb</td>
+                                <td>N/A</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Images</td>
+                                <td>400 Kb</td>
+                                <td>N/A</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Video</td>
+                                <td>19 Mb</td>
+                                <td>00:20:36</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>6</td>
+                                <td>Total</td>
+                                <td>24.20 Mb</td>
+                                <td>00:25:17</td>
+                            </tr>
+                        </tfoot>
+                    </table></div></div>'
+                . '</div><a href="#" class="search-display-info" data-infos="' . str_replace('"', '&quot;', $explain) . '">'
+                . $this->app->trans('%total% reponses', ['%total%' => '<span>'.number_format($result->getTotal(),null, null, ' ').'</span>']) . '</a>';
 
             $json['infos'] = $infoResult;
             $json['navigationTpl'] = $string;
@@ -178,16 +338,31 @@ class QueryController extends Controller
 
             if ($result->getTotal() === 0) {
                 $template = 'prod/results/help.html.twig';
-            } else {
+            }
+            else {
                 $template = 'prod/results/records.html.twig';
             }
-            $json['results'] = $this->render($template, ['results'=> $result]);
+
+            /** @var \Closure $filter */
+            $filter = $this->app['plugin.filter_by_authorization'];
+
+            $plugins = [
+                'workzone' => $filter('workzone'),
+                'actionbar' => $filter('actionbar'),
+            ];
+
+            $json['results'] = $this->render($template, ['results'=> $result, 'plugins'=>$plugins]);
 
 
             // add technical fields
-            $fieldLabels = [];
+            $fieldsInfosByName = [];
             foreach(ElasticsearchOptions::getAggregableTechnicalFields() as $k => $f) {
-                $fieldLabels[$k] = $this->app->trans($f['label']);
+                $fieldsInfosByName[$k] = $f;
+                $fieldsInfosByName[$k]['trans_label'] = $this->app->trans($f['label']);
+                $fieldsInfosByName[$k]['labels'] = [];
+                foreach($this->app->getAvailableLanguages() as $locale => $lng) {
+                    $fieldsInfosByName[$k]['labels'][$locale] = $this->app->trans($f['label'], [], "messages", $locale);
+                }
             }
 
             // add databox fields
@@ -199,13 +374,24 @@ class QueryController extends Controller
                 foreach ($databox->get_meta_structure() as $field) {
                     $name = $field->get_name();
                     $fieldsInfos[$sbasId][$name] = [
-                        'label'    => $field->get_label($this->app['locale']),
-                        'type'     => $field->get_type(),
-                        'business' => $field->isBusiness(),
-                        'multi'    => $field->is_multi(),
+                      'label'    => $field->get_label($this->app['locale']),
+                      'labels'   => $field->get_labels(),
+                      'type'     => $field->get_type(),
+                      'business' => $field->isBusiness(),
+                      'multi'    => $field->is_multi(),
                     ];
-                    if (!isset($fieldLabels[$name])) {
-                        $fieldLabels[$name] = $field->get_label($this->app['locale']);
+
+                    // infos on the "same" field (by name) on multiple databoxes !!!
+                    // label(s) can be inconsistants : the first databox wins
+                    if (!isset($fieldsInfosByName[$name])) {
+                        $fieldsInfosByName[$name] = [
+                            'label'       => $field->get_label($this->app['locale']),
+                            'labels'      => $field->get_labels(),
+                            'type'        => $field->get_type(),
+                            'field'       => $field->get_name(),
+                            'trans_label' => $field->get_label($this->app['locale']),
+                        ];
+                        $field->get_label($this->app['locale']);
                     }
                 }
             }
@@ -218,21 +404,21 @@ class QueryController extends Controller
             $acl = $this->getAclForUser();
             $json['rawResults'] = [];
             /** @var ElasticsearchRecord $record */
-            foreach ($result->getResults() as $record) {
+            foreach($result->getResults() as $record) {
                 $rawRecord = $record->asArray();
 
                 $sbasId = $record->getDataboxId();
                 $baseId = $record->getBaseId();
 
                 $caption = $rawRecord['caption'];
-                if ($acl && $acl->has_right_on_base($baseId, \ACL::CANMODIFRECORD)) {
+                if($acl && $acl->has_right_on_base($baseId, \ACL::CANMODIFRECORD)) {
                     $caption = array_merge($caption, $rawRecord['privateCaption']);
                 }
 
                 // read the fields following the structure order
                 $rawCaption = [];
-                foreach ($fieldsInfos[$sbasId] as $fieldName => $fieldInfos) {
-                    if (array_key_exists($fieldName, $caption)) {
+                foreach($fieldsInfos[$sbasId] as $fieldName=>$fieldInfos) {
+                    if(array_key_exists($fieldName, $caption)) {
                         $rawCaption[$fieldName] = $caption[$fieldName];
                     }
                 }
@@ -247,10 +433,16 @@ class QueryController extends Controller
             foreach ($result->getFacets() as $facet) {
                 $facetName = $facet['name'];
 
-                $facet['label'] = isset($fieldLabels[$facetName]) ? $fieldLabels[$facetName] : $facetName;
-
-                $facets[] = $facet;
+                if(array_key_exists($facetName, $fieldsInfosByName)) {
+                    $f = $fieldsInfosByName[$facetName];
+                    $facet['label'] = $f['trans_label'];
+                    $facet['labels'] = $f['labels'];
+                    $facet['type'] = strtoupper($f['type']) . "-AGGREGATE";
+                    $facets[] = $facet;
+                }
             }
+
+            // $json['jsq'] = $facetClauses;
 
             $json['facets'] = $facets;
             $json['phrasea_props'] = $proposals;
@@ -274,7 +466,6 @@ class QueryController extends Controller
             ];
             $json['results'] = $this->render($template, ['results'=> $result]);
         }
-
 
         return $this->app->json($json);
     }

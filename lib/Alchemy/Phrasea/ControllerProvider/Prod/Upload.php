@@ -12,7 +12,7 @@
 namespace Alchemy\Phrasea\ControllerProvider\Prod;
 
 use Alchemy\Phrasea\Application as PhraseaApplication;
-use Alchemy\Phrasea\Controller\LazyLocator;
+use Alchemy\Phrasea\Core\LazyLocator;
 use Alchemy\Phrasea\Controller\Prod\UploadController;
 use Alchemy\Phrasea\ControllerProvider\ControllerProviderTrait;
 use Silex\Application;
@@ -65,6 +65,9 @@ class Upload implements ControllerProviderInterface, ServiceProviderInterface
             ->bind('upload_flash_form');
         $controllers->get('/html5-version/', 'controller.prod.upload:getHtml5UploadForm')
             ->bind('upload_html5_form');
+
+        $controllers->get('/head/', 'controller.prod.upload:getHead')
+            ->bind('upload_head');
 
         $controllers->post('/', 'controller.prod.upload:upload')
             ->bind('upload');

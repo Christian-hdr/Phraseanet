@@ -18,8 +18,10 @@ use Alchemy\Phrasea\Model\Entities\Basket;
 use Alchemy\Phrasea\Model\Entities\FeedEntry;
 use Alchemy\Phrasea\Model\Entities\Token;
 use Alchemy\Phrasea\Model\Entities\ValidationData;
+use Alchemy\Phrasea\Model\Manipulator\TokenManipulator;
 use Alchemy\Phrasea\Model\Repositories\BasketElementRepository;
 use Alchemy\Phrasea\Model\Repositories\BasketRepository;
+use Alchemy\Phrasea\Model\Repositories\TokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -42,11 +44,7 @@ class LightboxController extends Controller
             $repository->findActiveValidationByUser($this->getAuthenticatedUser())
         );
 
-        $template = $this->isBrowserNewGenerationOrMobile()
-            ? 'lightbox/index.html.twig'
-            : 'lightbox/IE6/index.html.twig';
-
-        return $this->renderResponse($template, [
+        return $this->renderResponse('lightbox/index.html.twig', [
             'baskets_collection' => $basket_collection,
             'module_name'        => 'Lightbox',
             'module'             => 'lightbox',
@@ -82,18 +80,39 @@ class LightboxController extends Controller
     {
         /** @var BasketElementRepository $repository */
         $repository = $this->app['repo.basket-elements'];
-
         $basketElement = $repository->findUserElement($sselcont_id, $this->getAuthenticatedUser());
+
+        $basket = $basketElement->getBasket();
+
+        $elements = $basket->getElements();
+        for ($i = 0; $i < count($elements); ++$i) {
+            if ($sselcont_id == $elements[$i]->getId()) {
+                $nextKey = $i + 1;
+                $prevKey = $i - 1;
+                if ($nextKey < count($elements)) {
+                    $nextId = $elements[$nextKey]->getId();
+                }
+                else {
+                    $nextId = null;
+                }
+                if ($prevKey >= 0) {
+                    $prevId = $elements[$prevKey]->getId();
+                }
+                else {
+                    $prevId = null;
+                }
+            }
+        }
 
         if ($this->app['browser']->isMobile()) {
             return $this->renderResponse('lightbox/basket_element.html.twig', [
                 'basket_element' => $basketElement,
-                'module_name'    => $basketElement->getRecord($this->app)->get_title()
+                'module_name'    => $basketElement->getRecord($this->app)->get_title(),
+                'nextId'         => $nextId,
+                'prevId'         => $prevId
             ]);
         }
 
-        $isNewGenerationBrowser = $this->app['browser']->isNewGeneration();
-        $basket = $basketElement->getBasket();
 
         $ret = [];
         $ret['number'] = $basketElement->getRecord($this->app)->getNumber();
@@ -104,11 +123,11 @@ class LightboxController extends Controller
             ['record' => $basketElement->getRecord($this->app), 'not_wrapped' => true]
         );
         $ret['options_html'] = $this->render(
-            $isNewGenerationBrowser ? 'lightbox/sc_options_box.html.twig' : 'lightbox/IE6/sc_options_box.html.twig',
+            'lightbox/sc_options_box.html.twig',
             ['basket_element' => $basketElement]
         );
         $ret['agreement_html'] = $this->render(
-            $isNewGenerationBrowser ? 'lightbox/agreement_box.html.twig' : 'lightbox/IE6/agreement_box.html.twig',
+            'lightbox/agreement_box.html.twig',
             ['basket' => $basket, 'basket_element' => $basketElement]
         );
         $ret['selector_html'] = $this->render('lightbox/selector_box.html.twig', ['basket_element' => $basketElement]);
@@ -149,10 +168,7 @@ class LightboxController extends Controller
             'record' => $record,
             'not_wrapped' => true,
         ]);
-        $template_options = $browser->isNewGeneration()
-            ? 'lightbox/feed_options_box.html.twig'
-            : 'lightbox/IE6/feed_options_box.html.twig';
-        $ret['options_html'] = $this->render($template_options, ['feed_element' => $item]);
+        $ret['options_html'] = $this->render('lightbox/feed_options_box.html.twig', ['feed_element' => $item]);
         $ret['caption'] = $this->render(
             'common/caption.html.twig', [
             'view'   => 'preview',
@@ -213,7 +229,7 @@ class LightboxController extends Controller
 
         $basket = $this->markBasketRead($basket);
         $basket = $this->markBasketUserAwareOfValidation($basket);
-        
+
         $response = $this->renderResponse($this->getValidationTemplate(), [
             'baskets_collection' => $basket_collection,
             'basket'             => $basket,
@@ -238,28 +254,16 @@ class LightboxController extends Controller
             $basket->markRead();
             $this->app['orm.em']->flush();
         }
-        
+
         return $basket;
     }
 
-    /**
-     * @return bool
-     */
-    private function isBrowserNewGenerationOrMobile()
-    {
-        /** @var \Browser $browser */
-        $browser = $this->app['browser'];
-        return $browser->isNewGeneration() || $browser->isMobile();
-    }
-    
     /**
      * @return string
      */
     private function getValidationTemplate()
     {
-        return $this->isBrowserNewGenerationOrMobile()
-            ? 'lightbox/validate.html.twig'
-            : 'lightbox/IE6/validate.html.twig';
+        return 'lightbox/validate.html.twig';
     }
 
     /**
@@ -280,7 +284,7 @@ class LightboxController extends Controller
             ;
             $this->app['orm.em']->flush();
         }
-        
+
         return $basket;
     }
 
@@ -300,14 +304,10 @@ class LightboxController extends Controller
         /** @var FeedEntry $feed_entry */
         $feed_entry = $app['repo.feed-entries']->find($entry_id);
 
-        $template = $this->isBrowserNewGenerationOrMobile()
-            ? 'lightbox/feed.html.twig'
-            : 'lightbox/IE6/feed.html.twig';
-
         $content = $feed_entry->getItems();
         $first = $content->first();
 
-        $response = $this->renderResponse($template, [
+        $response = $this->renderResponse('lightbox/feed.html.twig', [
             'feed_entry'  => $feed_entry,
             'first_item'  => $first,
             'local_title' => $feed_entry->getTitle(),
@@ -359,7 +359,7 @@ class LightboxController extends Controller
 
         return $this->app->json($output);
     }
-    
+
     public function ajaxSetElementAgreementAction(Request $request, $sselcont_id)
     {
         $agreement = $request->request->get('agreement');
@@ -418,6 +418,7 @@ class LightboxController extends Controller
     /**
      * @param Basket $basket
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function ajaxSetReleaseAction(Basket $basket)
     {
@@ -433,8 +434,17 @@ class LightboxController extends Controller
             $this->assertAtLeastOneElementAgreed($basket);
             $participant = $basket->getValidation()->getParticipant($this->getAuthenticatedUser());
 
-            /** @var Token $token */
-            $token = $this->app['manipulator.token']->createBasketValidationToken($basket);
+            // find / create a "validate" token so the initator of the session can view results (no expiration)
+            $initiatorUser = $basket->getValidation()->getInitiator();
+
+            if(is_null($token = $this->getTokenRepository()->findValidationToken($basket, $initiatorUser))) {
+                // should not happen since when a validation is created, the initiator is force-included as a participant
+                $token = $this->getTokenManipulator()->createBasketValidationToken($basket, $initiatorUser, null);
+            }
+            else {
+                // a token already exists for the initiator
+                $token->setExpiration(null);        // the expiration for initiator should already be null...
+            }
             $url = $this->app->url('lightbox', ['LOG' => $token->getValue()]);
 
             $this->dispatch(PhraseaEvents::VALIDATION_DONE, new ValidationEvent($participant, $basket, $url));
@@ -445,11 +455,57 @@ class LightboxController extends Controller
             $this->app['orm.em']->flush();
 
             $data = ['error' => false, 'datas' => $this->app->trans('Envoie avec succes')];
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             $data = ['error' => true, 'datas' => $e->getMessage()];
         }
 
         return $this->app->json($data);
+    }
+
+    /**
+     * @param Basket $basket
+     * @return Response
+     */
+    public function ajaxGetElementsAction(Basket $basket)
+    {
+        $ret = [
+            'error'  => false,
+            'datas' => [
+                'counts' => [
+                    'yes'   => 0,
+                    'no'    => 0,
+                    'nul'   => 0,
+                    'total' => 0
+                ]
+            ]
+        ];
+        try {
+            if (!$basket->getValidation()) {
+                throw new Exception('There is no validation session attached to this basket');
+            }
+            foreach ($basket->getElements() as $element) {
+                $vd = $element->getUserValidationDatas($this->getAuthenticatedUser());
+                if($vd->getAgreement() === true) {
+                    $ret['datas']['counts']['yes']++;
+                }
+                elseif($vd->getAgreement() === false) {
+                    $ret['datas']['counts']['no']++;
+                }
+                elseif($vd->getAgreement() === null) {
+                    $ret['datas']['counts']['nul']++;
+                }
+                $ret['datas']['counts']['total']++;
+            }
+        }
+        catch (Exception $e) {
+            $ret = [
+                'error' => true,
+                'datas' => $e->getMessage()
+            ];
+        }
+
+        return $this->app->json($ret);
     }
 
     /**
@@ -467,4 +523,21 @@ class LightboxController extends Controller
         $message = $this->app->trans('You have to give your feedback at least on one document to send a report');
         throw new Exception($message);
     }
+
+    /**
+     * @return TokenManipulator
+     */
+    private function getTokenManipulator()
+    {
+        return $this->app['manipulator.token'];
+    }
+
+    /**
+     * @return TokenRepository
+     */
+    private function getTokenRepository()
+    {
+        return $this->app['repo.tokens'];
+    }
+
 }

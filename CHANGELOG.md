@@ -1,14 +1,290 @@
 # CHANGELOG
 
+## 4.1.1
 
-## 4.0.0 (xxxx-xx-xx)
+###  Change summary
 
-  - Convert Orders custom adapter to Doctrine entity.
-  - Convert Feeds custom adapter to Doctrine entity.
-  - Convert Users custom adapter to Doctrine entity.
-  - Convert Ftp Export custom adapter to Doctrine entity.
-  - Convert Ftp Export custom adapter to Doctrine entity.
-  - Session management is now part of Phraseanet configuration.
+- Phraseanet now using Docker. Retrieve all official images on DockerHub 
+- Worker manager, a new way for all operations on assets. In the near future, this will replace the current task manager.
+- Geolocation based on Mapbox (requires an account on Mapbox https://www.mapbox.com).
+- Video chaptering and subtitling support.
+- GUI redesign for Push, Feedback, List manager, Lightbox on mobile.
+
+
+ this version is finale version of 4.1.0 published in preview at start of year, a lot of improvement, bugfixes on several elements see summary here 
+
+### New Feature summary
+ 
+    * [PHRAS-2023] - Refacto Lightbox mobile in 4.1
+    * [PHRAS-2219] - Refacto design Push screen
+    * [PHRAS-2220] - Refacto design Feedback screen
+    * [PHRAS-2221] - Refacto design List manager general screen
+    * [PHRAS-2222] - Refacto design ListManager Advance Mode screen
+    * [PHRAS-2223] - Refacto dev list manager Advance Mode screen
+    * [PHRAS-2541] - Dev-Design-Prod/Publish Screen
+    * [PHRAS-2548] - Phraseanet Docker and Docker Compose
+    * [PHRAS-1226] - Geolocalisation In Phraseanet
+    * [PHRAS-1626] - bin/console databox:mount mount an existing databox
+    * [PHRAS-1628] - bin/console collection:publish
+    * [PHRAS-1630] - bin/console database:unmout 
+    * [PHRAS-1631] - bin/console collection:unpublish
+    * [PHRAS-1648] - bin/console user:password
+    * [PHRAS-1659] - bin/console user:create
+    * [PHRAS-1771] - bin/console collection:unpublish
+    * [PHRAS-1773] - bin/console collection:publish
+    * [PHRAS-2518] - Phraseanet worker Read/Write metadata
+    * [PHRAS-2520] - Phraseanet worker send webhook
+    * [PHRAS-2738] - Phraseanet worker populate database
+    * [PHRAS-2435] - Phraseanet Worker Build subdefinition
+    * [PHRAS-2436] - Phraseanet Worker build zip export and send mail
+    * [PHRAS-2636] - Phraseanet Worker fetch assets from external uploader (pull mode)
+    * [PHRAS-2904] - Fullfill field define in geoloc - position field with information return by Geonames
+    * [PHRAS-161]  - PROD Add a maps for geolocalisation of media in detailed view
+    * [PHRAS-1935] - View prod/ Video chapter editor
+    * [PHRAS-2997] - Matomo analytic service in Phraseanet
+    * [PHRAS-1890] - Add GS1 databases model to Phraseanet
+
+
+### Improvement and fix summary
+
+    * [PHRAS-1561] - Prod | Print - Use the label of field when print, use the GUI user language
+    * [PHRAS-2067] - Prod : Introduce thumbnail & preview generic images for Fonts records
+    * [PHRAS-2473] - Populate Optimisation, sometime populate databox (database) is very long
+    * [PHRAS-2524] - Put worker log in ELK 
+    * [PHRAS-2739] - incorporate Phraseanet-plugin-SubdefWebhook into Phraseanet
+    * [PHRAS-2157] - Prod / Share : Iframe sizes are set to 0 for audio documents
+    * [PHRAS-2538] - Some MP4 file is not correctly detected by Phraseanet.
+    * [PHRAS-2825] - Prod : Add a reset button to initialize searches filters
+    * [PHRAS-1872] - prod/export by email / subject are NOK
+    * [PHRAS-2342] - Report : collections not selected
+    * [PHRAS-2343] - report : all fields of all databases
+    * [PHRAS-2350] - Report : url is too long
+    * [PHRAS-2476] - Bad header in generated video preview file  
+    * [PHRAS-2196] - API - Stories records pagination on search answer and Stories fetch info 
+    * [PHRAS-2880] - extend admin GUI  for define facets ordering. 
+    * [PHRAS-2967] - Lightbox - dev of send email report - warn windows
+    * [PHRAS-1752] - update facebook sdk dependency
+    * [PHRAS-2678] - add `webhook monitor`
+    * [PHRAS-2915] - Lightbox (desktop version) Change sort order for basket and Feedback in landing page ( most recent in first)
+    * [PHRAS-2082] - Bump design of windows create user , create template user, create new subdef
+    * [PHRAS-2676] - Weaked download behaviour for large amount of data
+    * [PHRAS-2671] - Change behavior of preview display in audio file case
+    * [PHRAS-2879] - Define facets order in GUI and query result
+
+## 4.0.12 
+
+Release notes - Phraseanet - Version 4.0.12
+
+### Improvement
+    * [PHRAS-2955] - Cache doctrine entity metadata for performance
+    * [PHRAS-2964] - Application-box - set host colon of table sbas set to char 255
+    * [PHRAS-3012] - [PHRAS-2977] - Docker compose optimisation, refacto volumes, build image  
+        optimisation, add Phraseanet plugin in build image, bump ffmpeg version in worker, 
+       fix error un redis configuration.
+       more option for define volumes during installation process. 
+    * [PHRAS-3027] - Backport To 4.0 - Populate  - Slow query - due to  LIMIT in sql query.
+    * [PHRAS-3027] - Translation improvement in EN and DE.
+
+### Bugfix
+    * [PHRAS-2979] - The content of a story is not displayed even for users with appropriate on the collection
+
+
+## 4.1.0 
+
+Pre release of 4.1 
+
+
+## 4.0.11
+
+Release notes - Phraseanet - Version 4.0.11
+
+### New Feature and Improvement
+    * [PHRAS-2878] - Print feedback report in PDF
+    * [PHRAS-2757] - Exclude some collections from quarantine checkers sha256, UUID, filename (AKA exclude Trash from quarantine)
+    * [PHRAS-2766] - Add status change capabilities to quarantine lazaret in substitute and add action
+    * [PHRAS-2674] - Prod grey skin Improvement
+    * [PHRAS-2775] - Prod - plugin - Publish item in diapo local menu - plugin skeleton improvement.
+    * [PHRAS-925]  - Search Engine improvement for word with dot and hyphen characters
+    * [PHRAS-2496] - Pre-build vagrant image for Phraseanet and implement it in Phraseanet vagrant  file.
+    * [PHRAS-2637] - Sub definition Task init : select all databases when databases property is not set
+    * [PHRAS-2670] - Fix notifications slow sql and basket select 
+    * [PHRAS-2672] - Bump videojs version to 7.5
+    * [PHRAS-2691] - Prod - delete from trash , send deletion by bulk of 3 records
+    * [PHRAS-2700] - Prod - number of results  - Formating the results number
+    * [PHRAS-2742] - Enhance plugin-skeleton in 4.0
+    * [PHRAS-2750] - PHPExiftool to handle DJI XMP Tags, Bump exiftool version and switch to original exiftool/exiftool  github repository
+    * [PHRAS-835] -  ES - date format timestamp unix,  store and search datetime
+    * [PHRAS-2791] - Embed-bundle - Videojs player serve poster-image property with sub definition permalink
+    * [PHRAS-2842] - Databases Models - now default audio encodeur is mp3lame
+    * [PHRAS-2857] - Exclude some collections from quarantine checkers sha256, UUID, filename (AKA exclude Trash)   
+    * [PHRAS-2899] - Quarantine: allow to substitute without selecting target record, (when match only one record).
+    * [PHRAS-2765] - Translation in Plugin menu locale is now available
+    * [PHRAS-2929] - bump sinonjs dependency to  1.7.1
+    * [PHRAS-2728] - Landing page take browser language in account
+    * [PHRAS-2693] - Collection Sort Sorter is now presented by column
+    * [PHRAS-2817] - Deploy and Dev with docker is OK
+
+
+### Bugfix
+    * [PHRAS-1069] - Dates seems not extracted from iptc
+    * [PHRAS-1428] - Phraseanet Binaries in configuration  not used in some alchemy-fr libraries (AKA text extraction of pdf is NOK)
+    * [PHRAS-2567] - Registration Form - Term of use link is broken
+    * [PHRAS-2644] - Searching for stories after applying a document filtering choice gives no results
+    * [PHRAS-2652] - Fields "Phraseanet::no-source" are pushed to exiftool
+    * [PHRAS-2682] - Prod - facets display is NOK when switch from basket or thesaurus Tab.
+    * [PHRAS-2695] - Prod - Grey and White Skins - Browse Baskets: Unable to read the titles
+    * [PHRAS-2702] - Lightbox - scroller thumbnail Nok
+    * [PHRAS-2714] - Adding record from the API leaves a copy of the file into the system temporary directory
+    * [PHRAS-2715] - Embed bundle, border issue on firefox.
+    * [PHRAS-2716] - Records SetStatus HTTP API malfunction
+    * [PHRAS-2723] - None information (name, last name etc...) is keep from the Push or a FeedBack user creation form
+    * [PHRAS-2748] - Some characters into cterms (candidats) leeds to 500 error 
+    * [PHRAS-2754] - Permalink is not (re) activated when record is move from _TRASH_ collection
+    * [PHRAS-2860] - Generated Subdefs for video Portait are not correctly Oriented 
+    * [PHRAS-2877] - User manipulator does not allow to set a null email
+    * [PHRAS-2912] - When updating a user informations the wrong field are populated (job and activity inverted)
+    * [PHRAS-2811] - Cleanning of bad chars in candidats terms
+
+
+## 4.0.10
+  
+  Not publish
+
+## 4.0.9
+
+### Adds
+
+  - PHRAS-2535 - Back / Front - Unsubscription: It's now possible to request a validation by email to delete a Phraseanet user account.
+  - PHRAS-2480 - Back / Front - It's now possible to add a user model as order manager on a collection:All users with this model applied can manage orders on this collection. This features fixes an issue when users is provided by SAML and the orders manager is lost when user logs in. 
+  - PHRAS-2474 - Back / front. - Searched terms are now found even if the searched terms are split in Business Field and regular Field.
+  - PHRAS-2462 - Front - Share media on LinkedIn as you can do on Facebook, Twitter.
+  - PHRAS-2417 - Front - Skin: grey and white, graphic enhancements.
+  - PHRAS-2067 - Front - Introducing thumbnail & preview generic images for Fonts
+
+### Fixes
+
+  - PHRAS-2491 - Front - Click on facets title (expand/collapse) launched a bad query, due to jquery error.
+  - PHRAS-2510 - Front - Facets values appear Truncated after 15th character.
+  - PHRAS-2153 - Front - No user search possible with the field "Company" and field "Country".
+  - PHRAS-2154 - Front - Bug on Chrome only - selected 1 document instead of all for the feedback.
+  - PHRAS-2538 - Back - Some MP4 files were not correctly detected by Phraseanet.
+
+## 4.0.8
+
+### Adds:
+
+  - Upload: Distant files can be added via their URL in GUI and by API. Phraseanet downloads the file before archiving it.
+  - Search optimisation when searching in full text, there was a problem when the query mixed different types of fields.
+  - Search optimisation, it’s now possible to search a partial date in full text.
+  - Populate optimisation, now populating time: 3 times faster.
+  - It is now possible to migrate from 3.1 3.0 version to 4.X, without an intermediate step in 3.8.Fix:
+
+### Fixes
+ 
+  - Search filter were not taken into account due to a bug in JS.
+  - Overlay title: In this field, text was repeated twice if : one or several words were highlighted in the field, and if the title contained more than 102 characters.
+  - List Manager: it was impossible to add users in the list manager after page 3.
+  - List of fields was not refreshed in the exported fields section.
+  - Push and Feedback fix error when adding a user when Geonames was not set (null value in Geonames).
+
+## 4.0.7
+
+### Adds:
+
+  - Advanced search refacto
+  - Thesaurus search is now in strict mode
+  - Refactoring of report module
+  - Refactoring query storage and changing strategy for field search restriction
+  - It is now possible to search for terms in thesaurus and candidates in all languages, not only on the login language
+  - Enhancements on archive task
+  - Graphic enhancements for menu and icons
+  - Video file enhancement, support of MXF container
+  - Extraction of a video soundtrack (MP3, MP4, WAVE, etc.)
+  - For Office Documents, all generated subviews will be PDF assets by default. The flexpaper preview still exists but will be optional.
+  - In Prod Gui, there will be 5 facets but the possibility to view more.
+
+### Fixes:
+
+  - Quarantine: Fix for the “Substitute” action: alert when selection is empty
+  - Quarantine: File name with a special character can’t be added
+  - Fix for the Adobe CC default token
+  - XSS vulnerabilities in Prod, Admin & Lightbox. Many thanks to Kris (@HV_hat_)
+  - PDF containing (XMP-xmp:PageImage) fails generating subview
+  - MIME types are trucated
+  -Vagrant dev environment fix
+  - Feedback: Sort assets “Order by best choice” has no effect
+
+## 4.0.3
+
+### Adds:
+
+  - Prod: For a record, show the current day in the statistics section of the detailed view.
+  - Prod: Store state (open or closed) of facet answer. eg: Database or collection, store in session.
+  - Admin: Access to scheduler and task local menu when parameter is set to false in .yml configuration.
+  - Prod: Database, collection and document type facets are fixed on top
+  - Prod: Better rendering for values of exposure, shutter speed and flash status in facets. eg for shutter speed: 1/30 instead of 0,0333333.
+  - Versions 4 are now compliant with the Phraseanet plugins for Adobe CC Suite.
+  - White list mode: extending autoregistration and adding wildcard access condition by mail domain. Automatically grant access to a user according to the email entered in the request.
+  - Find your documents from the colors in the facets (AI plugin)
+  - Generate a PDF from a Word document or a picture, it’s now possible to define a pdf subview type
+  - Specify a temporary work repository for building video subdefs, to accelerate video generation.
+
+### Fixes:
+
+  - Prod: In Upload, correct status are not loaded
+  - Prod:Arrow keys navigation adds last selected facet as filter
+  - Admin:Subdef presets, sizes and bitrates (bits/s) not OK
+  - Admin: App error on loading in French due to a simple quote
+  - Prod: Deletion message is not fully readable when deleting a story
+  - Fixing highlight with Elasticsearch for full text only, not for the thesaurus
+  - 500 error at the first authentication for a user with the SAML Phraseanet pluginDev
+  - Dev: Fix API version returned in answer
+  - Dev: Fix vagrant provisioning for Windows
+
+## 4.0.2
+
+### Adds:
+
+  - Prod: Message Improv, when selected records are in Trash and another one.
+  - Prod: alt-click on active facets (filter) to invert it.
+  - Prod: do not erase facets in filter when returning 0 answers.
+  - Core: Add preference to authorize user connection without an email
+  - Core: Add preference to set default validity period of download link
+
+### Fixes:
+
+  - Thesaurus: 0 character terms are blocked
+  - Admin: fix action create and drop index from elasticsearch
+  - Prod: Fix advanced sarch: no filters possible on fields using IE
+  - Prod: 500 error in publication reader when record is missing (deleted from db)Unit test: fix error in Json serialization for custom link
+  - Prod: fix field list in advanced search with Edge browser
+  - Upload: fix 500 error when missing collection
+  - Install wizard: fix error in graphical installer
+ 
+## 4.0.0
+
+### Adds:
+
+#### Phraseanet gets a new search engine: Elasticsearch
+  - Faceted navigation enables to create a “mapping” of the response. Browse in a very intuitive way by creating several associations of filters. Facets can be used on the databases, collections, documentary fields and technical data.
+  - Speed of processing search and results display has been improved
+  - Possibility to use Kibana (open source visualization plugin for Elasticsearch)
+
+#### API enhancement
+  - New API routes are available (orders, facets, quarantine)
+  - Enhancement of new, faster routes
+
+ #### Redesign of the Prod interface
+  - Enhanced, redesigned ergonomics:  the detailed view windows; redesign of the workzone (baskets and stories, facets, webgalleries)  
+  - New white and grey skins are now available
+  - New order manager
+
+ #### Other
+  - Permalinks sharing: activate/deactivate sharing links for the document and sub resolutions
+  - New: the applicative trash: you can now define a collection named _TRASH_. Then, all deleted records from collections (except from Trash) go to the Trash collection. Permalinks on subdefs are deactivated. When you delete a record from the Trash collection, it is permanently deleted. When you move a record from the Trash collection to another, the permalinks are reactivated.
+  - Rewriting of the task scheduler based on the web sockets
+  - Quarantine enhancement
+  - Drag and drop upload
 
 ## 3.8.8 (2015-12-02)
 

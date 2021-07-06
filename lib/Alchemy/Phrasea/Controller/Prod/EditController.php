@@ -22,7 +22,10 @@ use Alchemy\Phrasea\Model\Entities\Preset;
 use Alchemy\Phrasea\Model\Entities\User;
 use Alchemy\Phrasea\Model\Manipulator\PresetManipulator;
 use Alchemy\Phrasea\Model\Repositories\PresetRepository;
+use Alchemy\Phrasea\Twig\PhraseanetExtension;
 use Alchemy\Phrasea\Vocabulary\ControlProvider\ControlProviderInterface;
+use Alchemy\Phrasea\WorkerManager\Event\RecordEditInWorkerEvent;
+use Alchemy\Phrasea\WorkerManager\Event\WorkerEvents;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -74,6 +77,9 @@ class EditController extends Controller
                     'format'               => '',
                     'explain'              => '',
                     'tbranch'              => $meta->get_tbranch(),
+                    'generate_cterms'       => $meta->get_generate_cterms(),
+                    'gui_editable'         => $meta->get_gui_editable(),
+                    'gui_visible'         => $meta->get_gui_visible(),
                     'maxLength'            => $meta->get_tag()
                         ->getMaxLength(),
                     'minLength'            => $meta->get_tag()
@@ -156,7 +162,9 @@ class EditController extends Controller
                 ];
 
                 $elements[$indice]['statbits'] = [];
+                $elements[$indice]['editableStatus'] = false;
                 if ($this->getAclForUser()->has_right_on_base($record->getBaseId(), \ACL::CHGSTATUS)) {
+                    $elements[$indice]['editableStatus'] = true;
                     foreach ($status as $n => $s) {
                         $tmp_val = substr(strrev($record->getStatus()), $n, 1);
                         $elements[$indice]['statbits'][$n]['value'] = ($tmp_val == '1') ? '1' : '0';
@@ -206,18 +214,21 @@ class EditController extends Controller
                     'h'   => $thumbnail->get_height(),
                 ];
 
-                $elements[$indice]['preview'] = $this->render(
+                $elements[$indice]['template'] = $this->render(
                     'common/preview.html.twig',
-                    ['record' => $record]
+                    ['record' => $record, 'not_wrapped' => true]
                 );
+
+                $elements[$indice]['data'] = $this->getRecordElementData($record);
 
                 $elements[$indice]['type'] = $record->getType();
             }
         }
-
+        $conf = $this->getConf();
         $params = [
             'multipleDataboxes' => $multipleDataboxes,
             'recordsRequest'    => $records,
+            'videoEditorConfig' => $conf->get(['video-editor']),
             'databox'           => $databox,
             'JSonStatus'        => json_encode($status),
             'JSonRecords'       => json_encode($elements),
@@ -323,63 +334,10 @@ class EditController extends Controller
             return $this->app->json(['message' => '', 'error'   => false]);
         }
 
-        $elements = $records->toArray();
-
-        foreach ($request->request->get('mds') as $rec) {
-            try {
-                $record = $databox->get_record($rec['record_id']);
-            } catch (\Exception $e) {
-                continue;
-            }
-
-            $key = $record->getId();
-
-            if (!array_key_exists($key, $elements)) {
-                continue;
-            }
-
-            $statbits = $rec['status'];
-            $editDirty = $rec['edit'];
-
-            if ($editDirty == '0') {
-                $editDirty = false;
-            } else {
-                $editDirty = true;
-            }
-
-            if (isset($rec['metadatas']) && is_array($rec['metadatas'])) {
-                $record->set_metadatas($rec['metadatas']);
-                $this->dispatch(PhraseaEvents::RECORD_EDIT, new RecordEdit($record));
-            }
-
-            $newstat = $record->getStatus();
-            $statbits = ltrim($statbits, 'x');
-            if (!in_array($statbits, ['', 'null'])) {
-                $mask_and = ltrim(str_replace(['x', '0', '1', 'z'], ['1', 'z', '0', '1'], $statbits), '0');
-                if ($mask_and != '') {
-                    $newstat = \databox_status::operation_and_not($newstat, $mask_and);
-                }
-
-                $mask_or = ltrim(str_replace('x', '0', $statbits), '0');
-
-                if ($mask_or != '') {
-                    $newstat = \databox_status::operation_or($newstat, $mask_or);
-                }
-
-                $record->setStatus($newstat);
-            }
-
-            $record->write_metas();
-
-            if ($statbits != '') {
-                $this->getDataboxLogger($databox)
-                    ->log($record, \Session_Logger::EVENT_STATUS, '', '');
-            }
-            if ($editDirty) {
-                $this->getDataboxLogger($databox)
-                    ->log($record, \Session_Logger::EVENT_EDIT, '', '');
-            }
-        }
+        // order the worker to save values in fields
+        $this->dispatch(WorkerEvents::RECORD_EDIT_IN_WORKER,
+            new RecordEditInWorkerEvent($request->request->get('mds'), array_keys($records->toArray()), $databox->get_sbas_id())
+        );
 
         return $this->app->json(['success' => true]);
     }
@@ -527,6 +485,37 @@ class EditController extends Controller
     private function getPresetManipulator()
     {
         return $this->app['manipulator.preset'];
+    }
+
+    /**
+     * @param \record_adapter $record
+     * @return array
+     */
+    private function getRecordElementData($record) {
+        $helpers = new PhraseanetExtension($this->app);
+        $recordData = [
+          'databoxId' => $record->getBaseId(),
+          'id' => $record->getId(),
+          'isGroup' => $record->isStory(),
+          'url' => (string)$helpers->getThumbnailUrl($record),
+        ];
+        $userHaveAccess = $this->app->getAclForUser($this->getAuthenticatedUser())->has_access_to_subdef($record, 'preview');
+        if ($userHaveAccess) {
+            $recordPreview = $record->get_preview();
+        } else {
+            $recordPreview = $record->get_thumbnail();
+        }
+
+        $recordData['preview'] = [
+          'width' => $recordPreview->get_width(),
+          'height' => $recordPreview->get_height(),
+          'url' => $this->app->url('alchemy_embed_view', [
+            'url' => (string)($this->getAuthenticatedUser() ? $recordPreview->get_url() : $recordPreview->get_permalink()->get_url()),
+            'autoplay' => false
+          ])
+        ];
+
+        return $recordData;
     }
 
 }

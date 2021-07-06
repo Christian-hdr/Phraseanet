@@ -14,10 +14,10 @@
 
 // Strings
 %token  quote_          "        -> string
-%token  string:quoted   ((\\")|[^"])+
+%token  string:quoted   [^"]+
 %token  string:_quote   "        -> default
 %token  raw_quote_      r"       -> raw
-%token  raw:raw_quoted   ((\\")|[^"])+
+%token  raw:raw_quoted  (?:(?>[^"\\]+)|\\.)+
 %token  raw:_raw_quote  "        -> default
 
 // Operators (too bad we can't use preg "i" flag)
@@ -28,6 +28,9 @@
 // Rest
 %token  database        database
 %token  collection      collection
+%token  sha256          sha256
+%token  geolocation     geolocation
+%token  uuid            uuid
 %token  type            type
 %token  id              id|recordid
 %token  created_on      created_(on|at)
@@ -86,12 +89,15 @@ match_key:
 
 #native_key:
     <database>
+  | <sha256>
+  | <uuid>
   | <collection>
   | <type>
   | <id>
 
 key:
-    timestamp_key()
+    geolocation_key()
+  | timestamp_key()
   | ::meta_prefix::  meta_key()
   | ::field_prefix:: field_key()
   |                  field_key()
@@ -99,6 +105,9 @@ key:
 #timestamp_key:
     <created_on>
   | <updated_on>
+
+#geolocation_key:
+    <geolocation>
 
 #meta_key:
   word_or_keyword()+
@@ -117,10 +126,10 @@ key:
 #value:
     word_or_keyword()+
   | quoted_string()
-  | raw_quoted_string()
 
 group:
     ::space::? ::parenthese_:: ::space::? primary() ::space::? ::_parenthese:: ::space::?
+
 
 // Thesaurus terms
 
@@ -140,7 +149,8 @@ context_block:
     ::parenthese_:: ::space::? context() ::space::? ::_parenthese:: #context
 
 context:
-   word_or_keyword() ( <space>? word_or_keyword() )*
+    word_or_keyword() ( <space>? word_or_keyword() )*
+
 
 // Generic helpers
 
@@ -168,6 +178,9 @@ keyword:
   | <or>
   | <database>
   | <collection>
+  | <sha256>
+  | <geolocation>
+  | <uuid>
   | <type>
   | <id>
   | <created_on>
@@ -184,4 +197,3 @@ symbol:
   | <bracket_>
   | <_bracket>
   | <colon>
-  | <equal>

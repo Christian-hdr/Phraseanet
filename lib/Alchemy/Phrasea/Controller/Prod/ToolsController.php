@@ -15,16 +15,19 @@ use Alchemy\Phrasea\Application\Helper\FilesystemAware;
 use Alchemy\Phrasea\Application\Helper\SubDefinitionSubstituerAware;
 use Alchemy\Phrasea\Controller\Controller;
 use Alchemy\Phrasea\Controller\RecordsRequest;
+use Alchemy\Phrasea\Core\Event\Record\RecordAutoSubtitleEvent;
 use Alchemy\Phrasea\Core\Event\Record\RecordEvents;
+use Alchemy\Phrasea\Core\Event\Record\SubdefinitionCreateEvent;
+use Alchemy\Phrasea\Core\PhraseaEvents;
 use Alchemy\Phrasea\Exception\RuntimeException;
 use Alchemy\Phrasea\Metadata\PhraseanetMetadataReader;
 use Alchemy\Phrasea\Metadata\PhraseanetMetadataSetter;
 use Alchemy\Phrasea\Record\RecordWasRotated;
+use Alchemy\Phrasea\WorkerManager\Event\RecordsWriteMetaEvent;
+use Alchemy\Phrasea\WorkerManager\Event\WorkerEvents;
 use DataURI\Parser;
 use MediaAlchemyst\Alchemyst;
 use MediaVorus\MediaVorus;
-use PHPExiftool\Exception\ExceptionInterface as PHPExiftoolException;
-use PHPExiftool\Reader;
 use Symfony\Component\HttpFoundation\Request;
 
 class ToolsController extends Controller
@@ -38,14 +41,16 @@ class ToolsController extends Controller
     {
         $records = RecordsRequest::fromRequest($this->app, $request, false);
 
-        $metadata = false;
+        $metadatas = false;
         $record = null;
         $recordAccessibleSubdefs = array();
-
+        $listsubdef= null;
         if (count($records) == 1) {
             /** @var \record_adapter $record */
             $record = $records->first();
 
+            /**Array list of subdefs**/
+            $listsubdef = array_keys($record-> get_subdefs());
             // fetch subdef list:
             $subdefs = $record->get_subdefs();
 
@@ -56,7 +61,6 @@ class ToolsController extends Controller
                 && $acl->has_right_on_base($record->getBaseId(), \ACL::IMGTOOLS)
             ) {
                 $databoxSubdefs = $record->getDatabox()->get_subdef_structure()->getSubdefGroup($record->getType());
-
                 foreach ($subdefs as $subdef) {
                     $label = $subdefName = $subdef->get_name();
                     if (null === $permalink = $subdef->get_permalink()) {
@@ -68,7 +72,7 @@ class ToolsController extends Controller
                             continue;
                         }
                         $label = $this->app->trans('prod::tools: document');
-                    } elseif ($databoxSubdefs->hasSubdef($subdefName)) {
+                    } elseif ($databoxSubdefs !== null && $databoxSubdefs->hasSubdef($subdefName)) {
                         if (!$acl->has_access_to_subdef($record, $subdefName)) {
                             continue;
                         }
@@ -82,25 +86,17 @@ class ToolsController extends Controller
                     );
                 }
             }
-
             if (!$record->isStory()) {
-                try {
-                    $metadata = $this->getExifToolReader()
-                        ->files($record->get_subdef('document')->getRealPath())
-                        ->first()->getMetadatas();
-                } catch (PHPExiftoolException $e) {
-                    // ignore
-                } catch (\Exception_Media_SubdefNotFound $e) {
-                    // ignore
-                }
+                $metadatas = true;
             }
         }
 
         return $this->render('prod/actions/Tools/index.html.twig', [
-            'records'   => $records,
-            'record'    => $record,
-            'recordSubdefs' => $recordAccessibleSubdefs,
-            'metadatas' => $metadata,
+            'records'           => $records,
+            'record'            => $record,
+            'recordSubdefs'     => $recordAccessibleSubdefs,
+            'metadatas'         => $metadatas,
+            'listsubdef'        => $listsubdef
         ]);
     }
 
@@ -123,6 +119,7 @@ class ToolsController extends Controller
         }
 
         foreach ($records as $record) {
+            /** @var  \media_subdef $subdef */
             foreach ($record->get_subdefs() as $subdef) {
                 if ($subdef->get_type() !== \media_subdef::TYPE_IMAGE) {
                     continue;
@@ -151,6 +148,7 @@ class ToolsController extends Controller
 
         foreach ($selection as $record) {
             $substituted = false;
+            /** @var  \media_subdef $subdef */
             foreach ($record->get_subdefs() as $subdef) {
                 if ($subdef->is_substituted()) {
                     $substituted = true;
@@ -164,7 +162,7 @@ class ToolsController extends Controller
             }
 
             if (!$substituted || $force) {
-                $record->rebuild_subdefs();
+                $this->dispatch(RecordEvents::SUBDEFINITION_CREATE, new SubdefinitionCreateEvent($record));
             }
         }
 
@@ -368,14 +366,6 @@ class ToolsController extends Controller
     }
 
     /**
-     * @return Reader
-     */
-    private function getExifToolReader()
-    {
-        return $this->app['exiftool.reader'];
-    }
-
-    /**
      * @return Alchemyst
      */
     private function getMediaAlchemyst()
@@ -426,8 +416,7 @@ class ToolsController extends Controller
 
         if($subDefName == 'document') {
             $this->getSubDefinitionSubstituer()->substituteDocument($record, $media);
-        }
-        else {
+        } else {
             $this->getSubDefinitionSubstituer()->substituteSubdef($record, $subDefName, $media);
         }
         $this->getDataboxLogger($record->getDatabox())
@@ -435,5 +424,134 @@ class ToolsController extends Controller
 
         unset($media);
         $this->getFilesystem()->remove($fileName);
+    }
+
+    /**
+     * @param $request
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function saveMetasAction(Request $request)
+    {
+        $record = new \record_adapter($this->app,
+            (int)$request->request->get("databox_id"),
+            (int)$request->request->get("record_id"));
+
+        $metadatas[0] = [
+            'meta_struct_id' => (int)$request->request->get("meta_struct_id"),
+            'meta_id'        => '',
+            'value'          => $request->request->get("value")
+        ];
+        try {
+            $record->set_metadatas($metadatas);
+
+            // order to write meta in file
+            $this->app['dispatcher']->dispatch(WorkerEvents::RECORDS_WRITE_META,
+                new RecordsWriteMetaEvent([$record->getRecordId()], $record->getDataboxId()));
+
+        }
+        catch (\Exception $e) {
+            return $this->app->json(['success' => false, 'errorMessage' => $e->getMessage()]);
+        }
+
+        return $this->app->json(['success' => true, 'errorMessage' => '']);
+    }
+
+    public function autoSubtitleAction(Request $request)
+    {
+        $record = new \record_adapter($this->app,
+            (int)$request->request->get("databox_id"),
+            (int)$request->request->get("record_id")
+        );
+
+        $permalinkUrl = '';
+        $conf = $this->getConf();
+
+        // if subdef_source not set, by default use the preview permalink
+        $subdefSource = $conf->get(['externalservice', 'ginger', 'AutoSubtitling', 'subdef_source']) ?: 'preview';
+
+        if ($this->isPhysicallyPresent($record, $subdefSource) && ($previewLink = $record->get_subdef($subdefSource)->get_permalink()) != null) {
+            $permalinkUrl = $previewLink->get_url()->__toString();
+        }
+
+        $this->dispatch(
+            PhraseaEvents::RECORD_AUTO_SUBTITLE,
+            new RecordAutoSubtitleEvent(
+                $record,
+                $permalinkUrl,
+                $request->request->get("subtitle_language_source"),
+                $request->request->get("meta_struct_id_source"),
+                $request->request->get("subtitle_language_destination"),
+                $request->request->get("meta_struct_id_destination")
+            )
+        );
+
+        return $this->app->json(["status" => "dispatch"]);
+    }
+
+    public function videoEditorAction(Request $request)
+    {
+        $records = RecordsRequest::fromRequest($this->app, $request, false);
+
+        $metadatas = false;
+        $record = null;
+        $JSFields = [];
+        $videoTextTrackFields = [];
+
+        if (count($records) == 1) {
+            /** @var \record_adapter $record */
+            $record = $records->first();
+            $databox = $record->getDatabox();
+
+
+            foreach ($databox->get_meta_structure() as $meta) {
+                /** @var \databox_field $meta */
+                $fields[] = $meta;
+
+                /** @Ignore */
+                $JSFields[$meta->get_id()] = [
+                    'id'     => $meta->get_id(),
+                    'name'   => $meta->get_name(),
+                    '_value' => $record->getCaption([$meta->get_name()]),
+                ];
+
+                if (preg_match('/^VideoTextTrack(.*)$/iu', $meta->get_name(), $matches) && !empty($matches[1]) && strlen($matches[1]) == 2 ) {
+                    $field['label'] = $matches[1];
+                    $field['meta_struct_id'] = $meta->get_id();
+                    $field['value'] = '';
+                    if ($record->get_caption()->has_field($meta->get_name())) {
+                        $fieldValues = $record->get_caption()->get_field($meta->get_name())->get_values();
+                        $fieldValue = array_pop($fieldValues);
+                        $field['value'] = $fieldValue->getValue();
+                    }
+                    $videoTextTrackFields[$meta->get_id()] = $field;
+                    unset($field);
+                }
+            }
+
+            if (!$record->isStory()) {
+                $metadatas = true;
+            }
+        }
+        $conf = $this->getConf();
+
+        return $this->render('prod/actions/Tools/videoEditor.html.twig', [
+            'records'               => $records,
+            'record'                => $record,
+            'videoEditorConfig'     => $conf->get(['video-editor']),
+            'metadatas'             => $metadatas,
+            'JSonFields'            => json_encode($JSFields),
+            'videoTextTrackFields'  => $videoTextTrackFields
+        ]);
+    }
+
+    private function isPhysicallyPresent(\record_adapter $record, $subdefName)
+    {
+        try {
+            return $record->get_subdef($subdefName)->is_physically_present();
+        } catch (\Exception $e) {
+            unset($e);
+        }
+
+        return false;
     }
 }

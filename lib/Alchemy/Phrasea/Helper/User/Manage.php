@@ -12,7 +12,7 @@ namespace Alchemy\Phrasea\Helper\User;
 
 use Alchemy\Phrasea\Application;
 use Alchemy\Phrasea\Application\Helper\NotifierAware;
-use Alchemy\Phrasea\Controller\LazyLocator;
+use Alchemy\Phrasea\Core\LazyLocator;
 use Alchemy\Phrasea\Helper\Helper;
 use Alchemy\Phrasea\Notification\Receiver;
 use Alchemy\Phrasea\Notification\Mail\MailRequestPasswordSetup;
@@ -87,16 +87,19 @@ class Manage extends Helper
         $this->query_parms = [
             'inactives' => $this->request->get('inactives'),
             'like_field' => $this->request->get('like_field'),
+            'like_type' => $this->request->get('like_type'),
             'like_value' => $this->request->get('like_value'),
             'sbas_id' => $this->request->get('sbas_id'),
             'base_id' => $this->request->get('base_id'),
             'last_model' => $this->request->get('last_model'),
+            'filter_guest_user' => $this->request->get('filter_guest_user') ? true : false,
             'srt' => $this->request->get("srt", \User_Query::SORT_CREATIONDATE),
             'ord' => $this->request->get("ord", \User_Query::ORD_DESC),
             'per_page' => $results_quantity,
             'offset_start' => $offset_start,
         ];
 
+        /** @var \User_Query $query */
         $query = $this->app['phraseanet.user-query'];
 
         if (is_array($this->query_parms['base_id']))
@@ -105,10 +108,11 @@ class Manage extends Helper
             $query->on_sbas_ids($this->query_parms['sbas_id']);
 
         $results = $query->sort_by($this->query_parms["srt"], $this->query_parms["ord"])
-            ->like($this->query_parms['like_field'], $this->query_parms['like_value'])
+            ->like($this->query_parms['like_field'], $this->query_parms['like_value'], $this->query_parms['like_type'])
             ->last_model_is($this->query_parms['last_model'])
             ->get_inactives($this->query_parms['inactives'])
             ->include_templates(true)
+            ->include_invite($this->query_parms['filter_guest_user'])
             ->on_bases_where_i_am($this->app->getAclForUser($this->app->getAuthenticatedUser()), [\ACL::CANADMIN])
             ->limit($offset_start, $results_quantity)
             ->execute();
@@ -142,7 +146,7 @@ class Manage extends Helper
 
     public function createNewUser()
     {
-        $email = $this->request->get('value');
+        $email = trim($this->request->get('value'));
 
         if ( ! \Swift_Validate::email($email)) {
             throw new \Exception_InvalidArgument('Invalid mail address');

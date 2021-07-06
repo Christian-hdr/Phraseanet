@@ -17,194 +17,132 @@ use Alchemy\Phrasea\Core\Configuration\DisplaySettingService;
 use Alchemy\Phrasea\Exception\SessionNotFound;
 use Alchemy\Phrasea\Feed\Aggregate;
 use Alchemy\Phrasea\Helper;
-use Alchemy\Phrasea\Model\Entities\UserSetting;
+use Alchemy\Phrasea\Helper\WorkZone as WorkzoneHelper;
 use Alchemy\Phrasea\Model\Repositories\FeedRepository;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\Request;
 
-class RootController extends Controller {
 
-	use Application\Helper\FirewallAware;
+class RootController extends Controller
+{
+    use Application\Helper\FirewallAware;
 
-	public function assertAuthenticated(Request $request) {
-		if (!$this->getAuthenticator()->isAuthenticated() && null !== $request->query->get('nolog')) {
-			return $this->app->redirectPath('login_authenticate_as_guest');
-		}
+    public function assertAuthenticated(Request $request)
+    {
+        if (!$this->getAuthenticator()->isAuthenticated() && null !== $request->query->get('nolog')) {
+            return $this->app->redirectPath('login_authenticate_as_guest');
+        }
 
-		if (null !== $response = $this->getFirewall()->requireAuthentication()) {
-			return $response;
-		}
+        if (null !== $response = $this->getFirewall()->requireAuthentication()) {
+            return $response;
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public function indexAction(Request $request) {
-		try {
-			\Session_Logger::updateClientInfos($this->app, 1);
-		} catch (SessionNotFound $e) {
-			return $this->app->redirectPath('logout');
-		}
+    public function indexAction(Request $request) {
+        try {
+            \Session_Logger::updateClientInfos($this->app, 1);
+        }
+        catch (SessionNotFound $e) {
+            return $this->app->redirectPath('logout');
+        }
 
-		$cssPath = $this->app['root.path'] . '/www/assets/prod/skins';
+        $user = $this->getAuthenticatedUser();
+        $cssfile = $this->getSettings()->getUserSetting($user, 'css');
 
-		$css = [];
+        if (!$cssfile) {
+            $cssfile = '000000';
+        }
 
-		$finder = new Finder();
-		/** @var SplFileInfo[] $iterator */
-		$iterator = $finder
-				->directories()
-				->depth(0)
-				->filter(function (\SplFileInfo $fileinfo) {
-					return ctype_xdigit($fileinfo->getBasename());
-				})
-				->in($cssPath);
+        $feeds = $this->getFeedRepository()->getAllForUser($this->getAclForUser());
+        $aggregate = Aggregate::createFromUser($this->app, $user);
 
-		foreach ($iterator as $dir) {
-			$baseName = $dir->getBaseName();
-			$css[$baseName] = $baseName;
-		}
+        $thjslist = "";
 
-		$user = $this->getAuthenticatedUser();
-		$cssfile = $this->getSettings()->getUserSetting($user, 'css');
+        $conf = $this->getConf();
 
-		if (!$cssfile && isset($css['000000'])) {
-			$cssfile = '000000';
-		}
+        $sbas = $bas2sbas = [];
 
-		$feeds = $this->getFeedRepository()->getAllForUser($this->getAclForUser());
-		$aggregate = Aggregate::createFromUser($this->app, $user);
+        foreach ($this->getApplicationBox()->get_databoxes() as $databox) {
+            $sbas_id = $databox->get_sbas_id();
 
-		$thjslist = "";
+            $sbas['s' . $sbas_id] = [
+                'sbid'   => $sbas_id,
+                'seeker' => null,
+            ];
 
-		$queries_topics = '';
+            foreach ($databox->get_collections() as $coll) {
+                $bas2sbas['b' . $coll->get_base_id()] = [
+                    'sbid'  => $sbas_id,
+                    'ckobj' => ['checked'    => false],
+                    'waschecked' => false,
+                ];
+            }
+        }
 
-		$conf = $this->getConf();
-		if ($conf->get(['registry', 'classic', 'render-topics']) == 'popups') {
-			$queries_topics = \queries::dropdown_topics($this->app['translator'], $this->app['locale']);
-		} elseif ($conf->get(['registry', 'classic', 'render-topics']) == 'tree') {
-			$queries_topics = \queries::tree_topics($this->app['locale']);
-		}
+        $helper = new Helper\Prod($this->app, $request);
 
-		$sbas = $bas2sbas = [];
+        /** @var \Closure $filter */
+        $filter = $this->app['plugin.filter_by_authorization'];
 
-		foreach ($this->getApplicationBox()->get_databoxes() as $databox) {
-			$sbas_id = $databox->get_sbas_id();
+        /* prepare work to extend whole taskbar... later
+        $menus = [
+            'push' => ['native'=>true, 'n'=>0],
+            'tools' => ['native'=>true, 'n'=>0],
+        ];
+        / ** @var ActionBarPluginInterface $plugin * /
+        foreach($filter('actionbar') as $kplugin=>$plugin) {
+            foreach($plugin->getActionBar() as $kmenu=>$menu) {
+                if(!array_key_exists($kmenu, $menus)) {
+                    $menus[$kmenu] = ['native'=>false, 'n'=>0];
+                }
+                $menus[$kmenu]['n']++;
+            }
+        }
+        */
 
-			$sbas['s' . $sbas_id] = [
-					'sbid' => $sbas_id,
-					'seeker' => null,
-			];
+        $plugins = [
+            'workzone' => $filter('workzone'),
+            'actionbar' => $filter('actionbar'),
+        ];
 
-			foreach ($databox->get_collections() as $coll) {
-				$bas2sbas['b' . $coll->get_base_id()] = [
-						'sbid' => $sbas_id,
-						'ckobj' => ['checked' => false],
-						'waschecked' => false,
-				];
-			}
-		}
+        return $this->render('prod/index.html.twig', [
+            'module_name'          => 'Production',
+            'WorkZone'             => new WorkzoneHelper($this->app, $request),
+            'module_prod'          => $helper,
+            'search_datas'         => $helper->get_search_datas(),
+            'cssfile'              => $cssfile,
+            'module'               => 'prod',
+            'events'               => $this->app['events-manager'],
+            'GV_defaultQuery_type' => $conf->get(['registry', 'searchengine', 'default-query-type']),
+            'GV_multiAndReport'    => $conf->get(['registry', 'modules', 'stories']),
+            'GV_thesaurus'         => $conf->get(['registry', 'modules', 'thesaurus']),
+            'cgus_agreement'       => \databox_cgu::askAgreement($this->app),
+            'feeds'                => $feeds,
+            'aggregate'            => $aggregate,
+            'GV_google_api'        => $conf->get(['registry', 'webservices', 'google-charts-enabled']),
+            'geocodingProviders'   => $conf->get(['geocoding-providers']),
+            'search_status'        => \databox_status::getSearchStatus($this->app),
+            'thesau_js_list'       => $thjslist,
+            'thesau_json_sbas'     => json_encode($sbas),
+            'thesau_json_bas2sbas' => json_encode($bas2sbas),
+            'thesau_languages'     => $this->app['locales.available'],
+            'plugins'              => $plugins,
+        ]);
+    }
+    /**
+     * @return DisplaySettingService
+     */
+    private function getSettings()
+    {
+        return $this->app['settings'];
+    }
 
-		$helper = new Helper\Prod($this->app, $request);
-
-		/** @var \Closure $filter */
-		$filter = $this->app['plugin.filter_by_authorization'];
-
-		$plugins = [
-				'workzone' => $filter('workzone'),
-				'actionbar' => $filter('actionbar'),
-		];
-// espace disque disponible ----------------------------------------------------
-
-		$use_titanet = TRUE;
-
-		$datas["disk"]["free"] = disk_free_space('/home'); //4382659584;//
-				
-		if ($use_titanet == TRUE) {
-			$datas["disk"]["total"] = disk_total_space('/home') - 1 * 1024 * 1024 * 1024 * 1024; //espace reservé pour titanet
-			$datas["disk"]["used"] = $this->getDiskDirectoryUsage('/home/gemnet'); //espace utilisé du repertoire
-		} else {
-			$datas["disk"]["total"] = disk_total_space('/home');
-			$datas["disk"]["used"] = $datas["disk"]["total"] - $datas["disk"]["free"];
-		}
-
-		$datas["disk"]["used_percent"] = sprintf('%.2f', ($datas["disk"]["used"] / $datas["disk"]["total"]) * 100);
-
-		if ($datas["disk"]["used_percent"] <= 75) {
-			$datas["disk"]["class"] = 'vert';
-		} elseif ($datas["disk"]["used_percent"] <= 90) {
-			$datas["disk"]["class"] = 'orange';
-		} else {
-			$datas["disk"]["class"] = 'rouge';
-		}
-//------------------------------------------------------------------------------	
-
-		return $this->render('prod/index.html.twig', [
-						'module_name' => 'Production',
-						'WorkZone' => new Helper\WorkZone($this->app, $request),
-						'module_prod' => $helper,
-						'search_datas' => $helper->get_search_datas(),
-						'cssfile' => $cssfile,
-						'module' => 'prod',
-						'events' => $this->app['events-manager'],
-						'GV_defaultQuery_type' => $conf->get(['registry', 'searchengine', 'default-query-type']),
-						'GV_multiAndReport' => $conf->get(['registry', 'modules', 'stories']),
-						'GV_thesaurus' => $conf->get(['registry', 'modules', 'thesaurus']),
-						'cgus_agreement' => \databox_cgu::askAgreement($this->app),
-						'css' => $css,
-						'feeds' => $feeds,
-						'aggregate' => $aggregate,
-						'GV_google_api' => $conf->get(['registry', 'webservices', 'google-charts-enabled']),
-						'queries_topics' => $queries_topics,
-						'search_status' => \databox_status::getSearchStatus($this->app),
-						'queries_history' => \queries::history($this->app, $user->getId()),
-						'thesau_js_list' => $thjslist,
-						'thesau_json_sbas' => json_encode($sbas),
-						'thesau_json_bas2sbas' => json_encode($bas2sbas),
-						'thesau_languages' => $this->app['locales.available'],
-						'plugins' => $plugins,
-						'espace_disque_used' => $this->human_filesize($datas["disk"]["used"]),
-						'espace_disque_total' => $this->human_filesize($datas["disk"]["total"]),
-						'espace_disque_class' => $datas["disk"]["class"],
-		]);
-	}
-
-	/**
-	 * @return DisplaySettingService
-	 */
-	private function getSettings() {
-		return $this->app['settings'];
-	}
-
-	/**
-	 * @return FeedRepository
-	 */
-	private function getFeedRepository() {
-		return $this->app['repo.feeds'];
-	}
-
-	function human_filesize($bytes, $decimals = 2) {
-		$size = array('o', 'ko', 'Mo', 'Go', 'To', 'Po', 'Eo', 'Zo', 'Yo');
-		$factor = floor((strlen($bytes) - 1) / 3);
-		return number_format($bytes / pow(1024, $factor), 1, ",", "") . " " . @$size[$factor];
-	}
-
-	function completeDiskUsage(&$infs) {
-		if (empty($infs["used"])) {
-			$infs["used"] = $infs["total"] - $infs["free"];
-		}
-		if (empty($infs["free"])) {
-			$infs["free"] = $infs["total"] - $infs["used"];
-		}
-		$infs["percent"] = ceil(($infs["used"] / $infs["total"]) * 100);
-		$infs["used_hr"] = $this->human_filesize($infs["used"], 1);
-		$infs["total_hr"] = $this->human_filesize($infs["total"], 1);
-	}
-
-	function getDiskDirectoryUsage($path) {
-		$res = exec("du -s " . escapeshellarg($path));
-		list($size, $p) = explode("\t", $res);
-		return $size * 1024;
-	}
-
+    /**
+     * @return FeedRepository
+     */
+    private function getFeedRepository()
+    {
+        return $this->app['repo.feeds'];
+    }
 }

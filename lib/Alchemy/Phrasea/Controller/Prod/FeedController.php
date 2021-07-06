@@ -19,8 +19,10 @@ use Alchemy\Phrasea\Core\PhraseaEvents;
 use Alchemy\Phrasea\Feed\Aggregate;
 use Alchemy\Phrasea\Feed\Link\AggregateLinkGenerator;
 use Alchemy\Phrasea\Feed\Link\FeedLinkGenerator;
+use Alchemy\Phrasea\Model\Entities\Feed;
 use Alchemy\Phrasea\Model\Entities\FeedEntry;
 use Alchemy\Phrasea\Model\Entities\FeedItem;
+use Alchemy\Phrasea\Model\Entities\FeedPublisher;
 use Alchemy\Phrasea\Model\Repositories\FeedEntryRepository;
 use Alchemy\Phrasea\Model\Repositories\FeedItemRepository;
 use Alchemy\Phrasea\Model\Repositories\FeedPublisherRepository;
@@ -46,6 +48,7 @@ class FeedController extends Controller
     }
 
     public function createFeedEntryAction(Request $request) {
+        /** @var Feed $feed */
         $feed = $this->getFeedRepository()->find($request->request->get('feed_id'));
 
         if (null === $feed) {
@@ -53,8 +56,10 @@ class FeedController extends Controller
         }
 
         $user = $this->getAuthenticatedUser();
+
+        /** @var FeedPublisher $publisher */
         $publisher = $this->getFeedPublisherRepository()->findOneBy([
-            'feed' => $feed, 
+            'feed' => $feed,
             'user' => $user,
         ]);
 
@@ -148,7 +153,7 @@ class FeedController extends Controller
             $entry->setFeed($new_feed);
         }
 
-        $items = explode(';', $request->request->get('sorted_lst'));
+        $items = explode(';', $request->request->get('lst'));
 
         $item_repository = $this->getFeedItemRepository();
         $manager = $this->getEntityManager();
@@ -167,7 +172,7 @@ class FeedController extends Controller
 
         return $this->app->json([
             'error'   => false,
-            'message' => 'succes',
+            'message' => 'success',
             'datas'   => $this->render('prod/results/entry.html.twig', ['entry' => $entry]),
         ]);
     }
@@ -238,8 +243,8 @@ class FeedController extends Controller
             'texte' => '<p>' . $this->app->trans(
                     'publication::Voici votre fil RSS personnel. Il vous permettra d\'etre tenu au courrant des publications.'
                 ) . '</p><p>' . $this->app->trans('publications::Ne le partagez pas, il est strictement confidentiel') . '</p>
-                <div><input type="text" readonly="readonly" class="input_select_copy" value="' . $link->getURI()
-                . '"/></div>',
+                <div class="feed_input_block"><input type="text" readonly="readonly" id="input-select-copy" class="input_select_copy" value="' . $link->getURI()
+                . '"/><button type="button" class="btn-info copy-feed" id="copy-feed">' . $this->app->trans('publications::copy') . '</button></div>',
             'titre' => $this->app->trans('publications::votre rss personnel'),
         ]);
     }
@@ -263,9 +268,11 @@ class FeedController extends Controller
             'texte' => '<p>' . $this->app->trans(
                     'publication::Voici votre fil RSS personnel. Il vous permettra d\'etre tenu au courrant des publications.'
                 ) . '</p><p>' . $this->app->trans('publications::Ne le partagez pas, il est strictement confidentiel') . '</p>
-                <div><input type="text" style="width:100%" value="' . $link->getURI() . '"/></div>',
-            'titre' => $this->app->trans('publications::votre rss personnel')
+                <div class="feed_input_block"><input type="text" readonly="readonly" id="input-select-copy" class="input_select_copy" value="' . $link->getURI()
+                . '"/><button type="button" class="btn-info copy-feed" id="copy-feed">' . $this->app->trans('publications::copy') . '</button></div>',
+            'titre' => $this->app->trans('publications::votre rss personnel'),
         ]);
+
     }
 
     public function ensureUserHasPublishRight()

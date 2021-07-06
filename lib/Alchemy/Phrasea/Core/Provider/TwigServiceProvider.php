@@ -120,11 +120,28 @@ class TwigServiceProvider implements ServiceProviderInterface
 
         $twig->addFilter(new \Twig_SimpleFilter('linkify', function (\Twig_Environment $twig, $string) use ($app) {
             return preg_replace(
-                "(([^']{1})((https?|file):((/{2,4})|(\\{2,4}))[\w:#%/;$()~_?/\-=\\\.&]*)([^']{1}))"
+                "/(\\W|^)(https?:\/{2,4}[\\w:#%\/;$()~_?\/\-=\\\.&]+)/m"
                 ,
-                '$1 $2 <a title="' . $app['translator']->trans('Open the URL in a new window') . '" class="ui-icon ui-icon-extlink" href="$2" style="display:inline;padding:2px 5px;margin:0 4px 0 2px;" target="_blank"> &nbsp;</a>$7'
+                '$1$2 <a title="' . $app['translator']->trans('Open the URL in a new window') . '" class=" fa fa-external-link" href="$2" style="font-size:1.2em;display:inline;padding:2px 5px;margin:0 4px 0 2px;" target="_blank"> &nbsp;</a>$7'
                 , $string
             );
+        }, ['needs_environment' => true, 'is_safe' => ['html']]));
+
+        $twig->addFilter(new \Twig_SimpleFilter('parseColor', function (\Twig_Environment $twig, $string) use ($app) {
+            $re = '/^(.*)\[#([0-9a-fA-F]{6})]$/m';
+            $stringArr = explode(';', $string);
+
+            foreach ($stringArr as $key => $value) {
+                preg_match_all($re, trim($value), $matches);
+                if ($matches && $matches[1] != null && $matches[2] != null) {
+                    $colorCode = '#' . $matches[2][0];
+                    $colorName = $matches[1][0];
+
+                    $stringArr[$key] = '<span style="white-space: nowrap;"><span class="color-dot" style="margin-right: 4px; background-color: ' . $colorCode . '"></span>' . $colorName . '</span>';
+                }
+            }
+
+            return implode('; ', $stringArr);
         }, ['needs_environment' => true, 'is_safe' => ['html']]));
 
         $twig->addFilter(new \Twig_SimpleFilter('bounce',
@@ -149,23 +166,21 @@ class TwigServiceProvider implements ServiceProviderInterface
                 $time = [];
                 $hours = floor($secondsInDecimals / 3600);
                 $secondsInDecimals -= $hours * 3600;
-
                 $minutes = floor($secondsInDecimals / 60);
                 $secondsInDecimals -= $minutes * 60;
-
                 $seconds = intVal($secondsInDecimals % 60, 10);
-
                 if ($hours > 0) {
                     array_push($time, (strlen($hours) < 2) ? "0{$hours}" : $hours);
                 }
                 array_push($time, (strlen($minutes) < 2) ? "0{$minutes}" : $minutes);
                 array_push($time, (strlen($seconds) < 2) ? "0{$seconds}" : $seconds);
-
                 $formattedTime = implode(':', $time);
 
                 return $formattedTime;
-            }));
+            }
+        ));
     }
+
     /**
      * Bootstraps the application.
      *

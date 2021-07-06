@@ -3,9 +3,18 @@
 <ul>
   <li class="title">{{ 'Apparait aussi dans ces reportages' | trans }}</li>
   {% for par in parents %}
-    <li onclick="openPreview(this, 'REG',0,'{{par.get_serialize_key()}}', true); return(false);"
-        class="otherRegToolTip" {% if app['conf'].get(['registry', 'classic', 'stories-preview']) %}tooltipsrc="{{ path('prod_tooltip_caption', { 'sbas_id' : par.get_sbas_id(), 'record_id' : par.get_record_id(), 'context' : 'basket' }) }}" {% endif %}>
-      <img src="{{par.get_thumbnail().get_url()}}" style="width:25px;height:25px;"/>
+    <li data-kind="REG"
+        data-position="0"
+        data-id="{{par.get_serialize_key()}}"
+        data-reload="true"
+        class="otherRegToolTip to-open-preview-action" {% if app['conf'].get(['registry', 'classic', 'stories-preview']) %}tooltipsrc="{{ path('prod_tooltip_caption', { 'sbas_id' : par.get_sbas_id(), 'record_id' : par.get_record_id(), 'context' : 'basket' }) }}" {% endif %}>
+
+        {% if par.get_thumbnail().is_physically_present() %}
+          <img src="{{par.get_thumbnail().get_url()}}" style="width:25px;height:25px;"/>
+        {% else %}
+          <img src="/assets/common/images/icons/story.png" style="width:25px;height:25px;"/>
+        {% endif %}
+
       <span class="title" title="{{ par.get_title() }}"> {{ par.get_title() }} </span>
     </li>
   {% endfor %}
@@ -16,20 +25,23 @@
 <ul>
   <li class="title">{{ 'Apparait aussi dans ces paniers' | trans }}</li>
 {% for basket in baskets %}
-  <li onclick="openPreview(this, 'BASK',0,'{{basket.getId()}}',true); return(false);"
-                   class="otherBaskToolTip" title="{{basket.getDescription()}}">
+  <li data-kind="BASK"
+      data-position="0"
+      data-id="{{basket.getId()}}"
+      data-reload="true"
+      class="otherBaskToolTip to-open-preview-action" title="{{basket.getDescription()}}">
     {#<img style="vertical-align:middle" src="/assets/common/images/icons/basket.png" width="16">#}
 
     {% if basket.getValidation() %}
-      <img src='/assets/common/images/icons/basket_validation.png' title='' width="16" class="btn-image"/>
+      <img src='/assets/common/images/icons/basket_validation.png' title='' width="24" class="btn-image"/>
     {% elseif basket.getPusher() %}
       {% if not basket.isRead() %}
-        <img src='/assets/common/images/icons/basket_push_unread.png' title='' width="16" class="btn-image"/>
+        <img src='/assets/common/images/icons/basket_push_unread.png' title='' width="24" class="btn-image"/>
       {% else %}
-        <img src='/assets/common/images/icons/basket_push.png' title='' width="16" class="btn-image"/>
+        <img src='/assets/common/images/icons/basket_push.png' title='' width="24" class="btn-image"/>
       {% endif %}
     {% else %}
-      <img src='/assets/common/images/icons/basket.png' title='' width="16" class="btn-image"/>
+      <img src='/assets/common/images/icons/basket.png' title='' width="24" class="btn-image"/>
     {% endif %}
 
     <span class="title">{{basket.getName()}}</span>

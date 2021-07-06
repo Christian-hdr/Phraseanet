@@ -13,9 +13,11 @@ namespace Alchemy\Phrasea\Controller\Admin;
 use Alchemy\Phrasea\Controller\Controller;
 use Alchemy\Phrasea\SearchEngine\Elastic\ElasticsearchSettingsFormType;
 use Alchemy\Phrasea\SearchEngine\Elastic\ElasticsearchOptions;
+use Alchemy\Phrasea\SearchEngine\Elastic\Structure\GlobalStructure;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use databox_descriptionStructure;
 
 class SearchEngineController extends Controller
 {
@@ -31,7 +33,19 @@ class SearchEngineController extends Controller
         $form->handleRequest($request);
 
         if ($form->isValid()) {
-            $this->saveElasticSearchOptions($form->getData());
+            /** @var ElasticsearchOptions $data */
+            $data = $form->getData();
+            // $q = $request->request->get('elasticsearch_settings');
+            $facetNames = [];   // rebuild the data "_customValues/facets" list following the form order
+            foreach($request->request->get('elasticsearch_settings') as $name=>$value) {
+                $matches = null;
+                if(preg_match('/^facets:(.+):limit$/', $name, $matches) === 1) {
+                    $facetNames[] = $matches[1];
+                }
+            }
+            $data->reorderAggregableFields($facetNames);
+
+            $this->saveElasticSearchOptions($data);
 
             return $this->app->redirectPath('admin_searchengine_form');
         }
@@ -40,6 +54,26 @@ class SearchEngineController extends Controller
             'form' => $form->createView(),
             'indexer' => $this->app['elasticsearch.indexer']
         ]);
+    }
+
+
+
+    public function dropIndexAction(Request $request)
+    {
+        $indexer = $this->app['elasticsearch.indexer'];
+        if ($indexer->indexExists()) {
+            $indexer->deleteIndex();
+        }
+        return $this->app->redirectPath('admin_searchengine_form');
+    }
+
+    public function createIndexAction(Request $request)
+    {
+        $indexer = $this->app['elasticsearch.indexer'];
+        if (!$indexer->indexExists()) {
+            $indexer->createIndex();
+        }
+        return $this->app->redirectPath('admin_searchengine_form');
     }
 
     /**
@@ -51,45 +85,36 @@ class SearchEngineController extends Controller
     }
 
     /**
-     * @param ElasticsearchOptions $options
-     * @return FormInterface
-     */
-    private function getConfigurationForm(ElasticsearchOptions $options)
-    {
-        return $this->app->form(new ElasticsearchSettingsFormType(), $options, [
-            'action' => $this->app->url('admin_searchengine_form'),
-        ]);
-    }
-
-    /**
      * @param ElasticsearchOptions $configuration
      * @return void
      */
     private function saveElasticSearchOptions(ElasticsearchOptions $configuration)
     {
+        // save to databoxes fields for backward compatibility (useless ?)
+        foreach($configuration->getAggregableFields() as $fname=>$aggregableField) {
+            foreach ($this->app->getDataboxes() as $databox) {
+                if(!is_null($f = $databox->get_meta_structure()->get_element_by_name($fname, databox_descriptionStructure::STRICT_COMPARE))) {
+                    $f->set_aggregable($aggregableField['limit'])->save();
+                }
+            }
+        }
+
+        // save to conf
         $this->getConf()->set(['main', 'search-engine', 'options'], $configuration->toArray());
     }
 
-    public function dropIndexAction(Request $request)
+    /**
+     * @param ElasticsearchOptions $options
+     * @return FormInterface
+     */
+    private function getConfigurationForm(ElasticsearchOptions $options)
     {
-        $indexer = $this->app['elasticsearch.indexer'];
+        /** @var GlobalStructure $g */
+        $g = $this->app['search_engine.global_structure'];
 
-        if ($indexer->indexExists()) {
-            $indexer->deleteIndex();
-        }
-
-        return $this->app->redirectPath('admin_searchengine_form');
-    }
-
-    public function createIndexAction(Request $request)
-    {
-        $indexer = $this->app['elasticsearch.indexer'];
-
-        if (!$indexer->indexExists()) {
-            $indexer->createIndex();
-        }
-
-        return $this->app->redirectPath('admin_searchengine_form');
+        return $this->app->form(new ElasticsearchSettingsFormType($g, $options), $options, [
+            'action' => $this->app->url('admin_searchengine_form'),
+        ]);
     }
 
     /**
@@ -101,10 +126,8 @@ class SearchEngineController extends Controller
         if (!$request->isXmlHttpRequest()) {
             $this->app->abort(400);
         }
-
         $indexer = $this->app['elasticsearch.indexer'];
         $index = $request->get('index');
-
         if (!$indexer->indexExists() || is_null($index))
         {
             return $this->app->json([
@@ -112,10 +135,9 @@ class SearchEngineController extends Controller
                 'message' => $this->app->trans('An error occurred'),
             ]);
         }
-
         return $this->app->json([
-                'success' => true,
-                'response' => $indexer->getSettings(['index' => $index])
+            'success' => true,
+            'response' => $indexer->getSettings(['index' => $index])
         ]);
     }
 }

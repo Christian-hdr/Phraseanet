@@ -9,12 +9,15 @@
  */
 
 use Alchemy\Phrasea\Application;
-use Alchemy\Phrasea\Model\Serializer\CaptionSerializer;
 use Alchemy\Phrasea\Model\Entities\Token;
 use Alchemy\Phrasea\Model\Entities\User;
+use Alchemy\Phrasea\Model\Repositories\BasketRepository;
+use Alchemy\Phrasea\Model\Repositories\StoryWZRepository;
+use Alchemy\Phrasea\Model\Serializer\CaptionSerializer;
 use Assert\Assertion;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Filesystem\Filesystem;
+
 
 class set_export extends set_abstract
 {
@@ -60,6 +63,7 @@ class set_export extends set_abstract
         $remain_hd = [];
 
         if ($storyWZid) {
+            /** @var StoryWZRepository $repository */
             $repository = $app['repo.story-wz'];
 
             $storyWZ = $repository->findByUserAndId($this->app, $app->getAuthenticatedUser(), $storyWZid);
@@ -68,6 +72,7 @@ class set_export extends set_abstract
         }
 
         if ($sstid != "") {
+            /** @var BasketRepository $repository */
             $repository = $app['repo.baskets'];
 
             $Basket = $repository->findUserBasket($sstid, $app->getAuthenticatedUser(), false);
@@ -387,21 +392,22 @@ class set_export extends set_abstract
      * @param User $user
      * @param Filesystem $filesystem
      * @param array $wantedSubdefs
-     * @param $rename_title
-     * @param $includeBusinessFields
+     * @param bool $rename_title
+     * @param bool $includeBusinessFields
+     * @param $stampChoice
      * @return array
      * @throws Exception
      */
-    public function prepare_export(User $user, Filesystem $filesystem, Array $wantedSubdefs, $rename_title, $includeBusinessFields,$stampChoice = null)
+    public function prepare_export(User $user, Filesystem $filesystem, Array $wantedSubdefs, $rename_title, $includeBusinessFields, $stampChoice = null)
     {
         if (!is_array($wantedSubdefs)) {
             throw new Exception('No subdefs given');
         }
 
         $includeBusinessFields = (bool) $includeBusinessFields;
-        $files = array();
+        $files = [];
         $n_files = 0;
-        $file_names = array();
+        $file_names = [];
         $size = 0;
         $unicode = $this->app['unicode'];
 
@@ -410,13 +416,13 @@ class set_export extends set_abstract
 
             $id = count($files);
 
-            $files[$id] = array(
-                'base_id'       => $download_element->get_base_id(),
-                'record_id'     => $download_element->get_record_id(),
+            $files[$id] = [
+                'base_id'       => $download_element->getBaseId(),
+                'record_id'     => $download_element->getRecordId(),
                 'original_name' => '',
                 'export_name'   => '',
-                'subdefs'       => array()
-            );
+                'subdefs'       => [],
+            ];
 
             $BF = false;
 
@@ -472,6 +478,7 @@ class set_export extends set_abstract
             //
             $sizeMaxAjout = $sizeMaxExt = 0;
             $sd = $download_element->get_subdefs();
+
             foreach ($download_element->get_downloadable() as $subdefName => $properties) {
                 if ($properties === false || !in_array($subdefName, $wantedSubdefs)) {
                     continue;
@@ -494,6 +501,7 @@ class set_export extends set_abstract
                     case 'caption':
                     case 'caption-yaml':
                         $subdef_ok = true;
+
                         break;
                     case 'thumbnail':
                         $subdef_ok = true;
@@ -501,6 +509,7 @@ class set_export extends set_abstract
                             'path' => $sd[$subdefName]->get_path(),
                             'file' => $sd[$subdefName]->get_file()
                         ];
+
                         break;
                     case 'document':
                         $subdef_ok = true;
@@ -518,6 +527,7 @@ class set_export extends set_abstract
                                 ];
                             }
                         }
+
                         break;
                     case 'preview':
                         $tmp_pathfile = [
@@ -541,6 +551,7 @@ class set_export extends set_abstract
                         else {
                             $subdef_ok = true;
                         }
+
                         break;
                 }
 
@@ -566,7 +577,6 @@ class set_export extends set_abstract
                             $files[$id]["subdefs"][$subdefName]["folder"] = $download_element->get_directory();
 
                             break;
-
                         case 'document':
                         case 'preview':
                         case 'thumbnail':
@@ -586,21 +596,25 @@ class set_export extends set_abstract
                             $size += $sd[$subdefName]->get_size();
 
                             break;
-
                         default:    // should no happen
                             $ajout = $ext = '';
+
                             break;
                     }
 
                     $sizeMaxAjout = max($sizeMaxAjout, mb_strlen($ajout));
                     $sizeMaxExt   = max($sizeMaxExt, mb_strlen($ext));
                 }
-            } // end loop on downloadable subdefs
+            }
+
+            // end loop on downloadable subdefs
 
             // check that no exportNames are double, else add a number
             // also truncate exportName so the whole filename will not be too long
             //     "aTooLongName_caption.xml" --> "aTooLo_caption-2.xml"
+
             $n = 1;
+
             do {
                 $nSuffix = ($n==1) ? '' : ('#'.$n);
                 $maxExportNameLength = self::$maxFilenameLength - $sizeMaxAjout - strlen($nSuffix) - 1 - $sizeMaxExt;
@@ -644,12 +658,12 @@ class set_export extends set_abstract
             }
         }
 
-        $this->list = array(
+        $this->list = [
             'files' => $files,
             'names' => $file_names,
             'size'  => $size,
-            'count' => $n_files
-        );
+            'count' => $n_files,
+        ];
 
         return $this->list;
     }
@@ -778,28 +792,5 @@ class set_export extends set_abstract
 
             $stmt->closeCursor();
         }
-    }
-
-    public function has_stamp_option()
-    {
-        if ($this->total_download == 0) {
-            return false;
-        }
-
-        $domprefs = new DOMDocument();
-        foreach ($this->elements as $download_element) {
-            if (false === $domprefs->loadXML($download_element->getCollection()->get_prefs())) {
-                continue;
-            }
-            $xpprefs = new DOMXPath($domprefs);
-            $stampNodes = $xpprefs->query('/baseprefs/stamp');
-            if ($stampNodes->length != 0) {
-
-                return true;
-            }
-
-        }
-
-        return false;
     }
 }

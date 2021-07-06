@@ -39,7 +39,6 @@ class eventsmanager_broker
             ],
             'notify' => [
                 'eventsmanager_notify_autoregister',
-                'eventsmanager_notify_bridgeuploadfail',
                 'eventsmanager_notify_downloadmailfail',
                 'eventsmanager_notify_feed',
                 'eventsmanager_notify_order',
@@ -166,7 +165,7 @@ class eventsmanager_broker
         }
 
         if (((int) $page + 1) * $n < $total) {
-            $data['next'] = '<a href="#" onclick="print_notifications(' . ((int) $page + 1) . ');return false;">' . $this->app->trans('charger d\'avantages de notifications') . '</a>';
+            $data['next'] = '<a href="#" class="notification__print-action" data-page="' . ((int) $page + 1) . '">' . $this->app->trans('charger d\'avantages de notifications') . '</a>';
         }
 
         return $data;

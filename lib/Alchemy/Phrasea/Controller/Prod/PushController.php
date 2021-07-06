@@ -9,6 +9,7 @@
  */
 namespace Alchemy\Phrasea\Controller\Prod;
 
+use ACL;
 use Alchemy\Phrasea\Application\Helper\DataboxLoggerAware;
 use Alchemy\Phrasea\Application\Helper\DispatcherAware;
 use Alchemy\Phrasea\Application\Helper\EntityManagerAware;
@@ -28,13 +29,22 @@ use Alchemy\Phrasea\Model\Entities\ValidationParticipant;
 use Alchemy\Phrasea\Model\Entities\ValidationSession;
 use Alchemy\Phrasea\Model\Manipulator\TokenManipulator;
 use Alchemy\Phrasea\Model\Manipulator\UserManipulator;
+use Alchemy\Phrasea\Model\Repositories\BasketRepository;
+use Alchemy\Phrasea\Model\Repositories\TokenRepository;
 use Alchemy\Phrasea\Model\Repositories\UserRepository;
 use Alchemy\Phrasea\Model\Repositories\UsrListRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
+use Exception;
 use RandomLib\Generator;
+use record_adapter;
+use Session_Logger;
+use Swift_Validate;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use User_Query;
 
 class PushController extends Controller
 {
@@ -53,6 +63,16 @@ class PushController extends Controller
         return $this->renderPushTemplate($request, 'Feedback');
     }
 
+
+    /** ----------------------------------------------------------------------------------
+     * a simple push is made by the current user to many "receivers" (=participants)
+     *
+     * this is the same code as "validation" request, except here we don't create a validation session
+     *
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function sendAction(Request $request)
     {
         $ret = [
@@ -87,7 +107,7 @@ class PushController extends Controller
                 try {
                     /** @var User $user_receiver */
                     $user_receiver = $this->getUserRepository()->find($receiver['usr_id']);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     throw new ControllerException(
                         $this->app->trans('Unknown user %user_id%', ['%user_id%' => $receiver['usr_id']])
                     );
@@ -100,7 +120,7 @@ class PushController extends Controller
                 $Basket->setPusher($this->getAuthenticatedUser());
                 $Basket->markUnread();
 		$Basket->setMess($mess);
-                
+
                 $manager->persist($Basket);
 
                 foreach ($pusher->get_elements() as $element) {
@@ -116,19 +136,19 @@ class PushController extends Controller
                         $this->getAclForUser($user_receiver)->grant_hd_on(
                             $basketElement->getRecord($this->app),
                             $this->getAuthenticatedUser(),
-                            \ACL::GRANT_ACTION_PUSH
+                            ACL::GRANT_ACTION_PUSH
                         );
                     } else {
                         $this->getAclForUser($user_receiver)->grant_preview_on(
                             $basketElement->getRecord($this->app),
                             $this->getAuthenticatedUser(),
-                            \ACL::GRANT_ACTION_PUSH
+                            ACL::GRANT_ACTION_PUSH
                         );
                     }
 
                     $this->getDataboxLogger($element->getDatabox())->log(
                         $element,
-                        \Session_Logger::EVENT_VALIDATE,
+                        Session_Logger::EVENT_PUSH,
                         $user_receiver->getId(),
                         ''
                     );
@@ -140,9 +160,15 @@ class PushController extends Controller
                     'basket' => $Basket->getId(),
                 ];
 
-                if (!$this->getConf()->get(['registry', 'actions', 'enable-push-authentication'])
-                    || !$request->get('force_authentication')
-                ) {
+                // here we send an email to each participant
+                //
+                // if we don't request the user to auth (=type his login/pwd),
+                //  we generate a !!!! 'view' !!!! token to be included as 'LOG' parameter in url
+                //
+                // - the 'view' token is created to give access to lightbox in "compare" mode, NOT "validation"
+                // - the 'view' token has no expiration
+                //
+                if (!$this->getConf()->get(['registry', 'actions', 'enable-push-authentication'])  || !$request->get('force_authentication') ) {
                     $arguments['LOG'] = $this->getTokenManipulator()->createBasketAccessToken($Basket, $user_receiver)->getValue();
                 }
 
@@ -178,6 +204,18 @@ class PushController extends Controller
         return $this->app->json($ret);
     }
 
+
+    /** ----------------------------------------------------------------------------------
+     * a validation request is made by the current user to many participants
+     *
+     * this is the same code as "send" request (=simple push), except here we create a validation session,
+     *   register participants and data...
+     *
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
     public function validateAction(Request $request)
     {
         $ret = [
@@ -197,7 +235,7 @@ class PushController extends Controller
             ]));
             $validation_description = $request->request->get('validation_description');
 	    $mess = $request->request->get('message');
-	   
+
             $participants = $request->request->get('participants');
 
             if (!is_array($participants) || empty($participants)) {
@@ -208,6 +246,8 @@ class PushController extends Controller
                 throw new ControllerException($this->app->trans('No elements to validate'));
             }
 
+            // a validation must apply to a basket...
+            //
             if ($pusher->is_basket()) {
                 $basket = $pusher->get_original_basket();
 		$basket->setMess($mess);
@@ -237,24 +277,35 @@ class PushController extends Controller
 
             $manager->refresh($basket);
 
+            // if the basket is already under validation, we work on it
+            // else we create a validationSession
+            //
+            $expireDate = null;
             if (!$basket->getValidation()) {
+                // create the validationSession
                 $Validation = new ValidationSession();
                 $Validation->setInitiator($this->getAuthenticatedUser());
                 $Validation->setBasket($basket);
 
+                // add an expiration date if a duration was specified
                 $duration = (int)$request->request->get('duration');
 
                 if ($duration > 0) {
-                    $date = new \DateTime('+' . $duration . ' day' . ($duration > 1 ? 's' : ''));
-                    $Validation->setExpires($date);
+                    $expireDate = new DateTime('+' . $duration . ' day' . ($duration > 1 ? 's' : ''));
+                    $Validation->setExpires($expireDate);
                 }
 
                 $basket->setValidation($Validation);
                 $manager->persist($Validation);
-            } else {
+            }
+            else {
+                // go on with existing validationSession
                 $Validation = $basket->getValidation();
+                $expireDate = $Validation->getExpires();
             }
 
+            // we always add the author of the validation request (current user) to the participants
+            //
             $found = false;
             foreach ($participants as $participant) {
                 if ($participant['usr_id'] === $this->getAuthenticatedUser()->getId()) {
@@ -272,7 +323,11 @@ class PushController extends Controller
                 ];
             }
 
+            // add participants to the validationSession
+            //
             foreach ($participants as $key => $participant) {
+
+                // sanity check
                 foreach (['see_others', 'usr_id', 'agree', 'HD'] as $mandatoryParam) {
                     if (!array_key_exists($mandatoryParam, $participant)) {
                         throw new ControllerException(
@@ -284,17 +339,21 @@ class PushController extends Controller
                 try {
                     /** @var User $participantUser */
                     $participantUser = $this->getUserRepository()->find($participant['usr_id']);
-                } catch (\Exception $e) {
+                }
+                catch (Exception $e) {
                     throw new ControllerException(
                         $this->app->trans('Unknown user %usr_id%', ['%usr_id%' => $participant['usr_id']])
                     );
                 }
+                // end of sanity check
 
+                // if participant already exists, skip insertion
                 try {
                     $Validation->getParticipant($participantUser);
                     continue;
-                } catch (NotFoundHttpException $e) {
-
+                }
+                catch (NotFoundHttpException $e) {
+                    // participant not yet exists, create
                 }
 
                 $validationParticipant = new ValidationParticipant();
@@ -316,13 +375,14 @@ class PushController extends Controller
                         $this->getAclForUser($participantUser)->grant_hd_on(
                             $basketElement->getRecord($this->app),
                             $this->getAuthenticatedUser(),
-                            \ACL::GRANT_ACTION_VALIDATE
+                            ACL::GRANT_ACTION_VALIDATE
                         );
-                    } else {
+                    }
+                    else {
                         $this->getAclForUser($participantUser)->grant_preview_on(
                             $basketElement->getRecord($this->app),
                             $this->getAuthenticatedUser(),
-                            \ACL::GRANT_ACTION_VALIDATE
+                            ACL::GRANT_ACTION_VALIDATE
                         );
                     }
 
@@ -331,7 +391,7 @@ class PushController extends Controller
 
                     $this->getDataboxLogger($basketElement->getRecord($this->app)->getDatabox())->log(
                         $basketElement->getRecord($this->app),
-                        \Session_Logger::EVENT_PUSH,
+                        Session_Logger::EVENT_VALIDATE,
                         $participantUser->getId(),
                         ''
                     );
@@ -339,6 +399,7 @@ class PushController extends Controller
                     $validationParticipant->addData($validationData);
                 }
 
+                /** @var ValidationParticipant $validationParticipant */
                 $validationParticipant = $manager->merge($validationParticipant);
 
                 $manager->flush();
@@ -347,10 +408,22 @@ class PushController extends Controller
                     'basket' => $basket->getId(),
                 ];
 
-                if (!$this->getConf()->get(['registry', 'actions', 'enable-push-authentication'])
-                    || !$request->get('force_authentication')
-                ) {
-                    $arguments['LOG'] = $this->getTokenManipulator()->createBasketAccessToken($basket, $participantUser)->getValue();
+                // here we send an email to each participant
+                //
+                // if we don't request the user to auth (=type his login/pwd),
+                //  we generate a !!!! 'validate' !!!! token to be included as 'LOG' parameter in url
+                //
+                // - the 'validate' token has same expiration as validation-session (except for initiator)
+                //
+                if (!$this->getConf()->get(['registry', 'actions', 'enable-push-authentication']) || !$request->get('force_authentication') ) {
+                    if($participantUser->getId() === $this->getAuthenticatedUser()->getId()) {
+                        // the initiator of the validation gets a no-expire token (so he can see result after validation expiration)
+                        $arguments['LOG'] = $this->getTokenManipulator()->createBasketValidationToken($basket, $participantUser, null)->getValue();
+                    }
+                    else {
+                        // a "normal" participant/user gets a expiring token
+                        $arguments['LOG'] = $this->getTokenManipulator()->createBasketValidationToken($basket, $participantUser, $expireDate)->getValue();
+                    }
                 }
 
                 $url = $this->app->url('lightbox_validation', $arguments);
@@ -397,12 +470,16 @@ class PushController extends Controller
         return $this->app->json($ret);
     }
 
+    /**
+     * @param $usr_id
+     * @return JsonResponse
+     */
     public function getUserAction($usr_id)
     {
         $data = null;
 
         $query = $this->createUserQuery();
-        $query->on_bases_where_i_am($this->getAclForUser($this->getAuthenticatedUser()), [\ACL::CANPUSH]);
+        $query->on_bases_where_i_am($this->getAclForUser($this->getAuthenticatedUser()), [ACL::CANPUSH]);
 
         $query->in([$usr_id]);
 
@@ -419,6 +496,10 @@ class PushController extends Controller
         return $this->app->json($data);
     }
 
+    /**
+     * @param $list_id
+     * @return JsonResponse
+     */
     public function getListAction($list_id)
     {
         $data = null;
@@ -433,12 +514,17 @@ class PushController extends Controller
         return $this->app->json($data);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
     public function addUserAction(Request $request)
     {
         $result = ['success' => false, 'message' => '', 'user'    => null];
 
         try {
-            if (!$this->getAclForUser($this->getAuthenticatedUser())->has_right(\ACL::CANADMIN))
+            if (!$this->getAclForUser($this->getAuthenticatedUser())->has_right(ACL::CANADMIN))
                 throw new ControllerException($this->app->trans('You are not allowed to add users'));
 
             if (!$request->request->get('firstname'))
@@ -450,7 +536,7 @@ class PushController extends Controller
             if (!$request->request->get('email'))
                 throw new ControllerException($this->app->trans('Email is required'));
 
-            if (!\Swift_Validate::email($request->request->get('email')))
+            if (!Swift_Validate::email($request->request->get('email')))
                 throw new ControllerException($this->app->trans('Email is invalid'));
         } catch (ControllerException $e) {
             $result['message'] = $e->getMessage();
@@ -470,6 +556,8 @@ class PushController extends Controller
         }
 
         try {
+            $manager = $this->getEntityManager();
+
             $password = $this->getRandomGenerator()->generateString(128);
 
             $user = $this->getUserManipulator()->createUser($email, $password, $email);
@@ -483,22 +571,29 @@ class PushController extends Controller
                 $user->setCompany($request->request->get('company'));
             }
             if ($request->request->get('job')) {
-                $user->setCompany($request->request->get('job'));
+                $user->setJob($request->request->get('job'));
             }
-            if ($request->request->get('form_geonameid')) {
-                $this->getUserManipulator()->setGeonameId($user, $request->request->get('form_geonameid'));
+            if ($request->request->get('city')) {
+                $this->getUserManipulator()->setGeonameId($user, $request->request->get('city'));
             }
+
+            $manager->persist($user);
+            $manager->flush();
 
             $result['message'] = $this->app->trans('User successfully created');
             $result['success'] = true;
             $result['user'] = $this->formatUser($user);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['message'] = $this->app->trans('Error while creating user');
         }
 
         return $this->app->json($result);
     }
 
+    /**
+     * @param Request $request
+     * @return string
+     */
     public function getAddUserFormAction(Request $request)
     {
         $params = ['callback' => $request->query->get('callback')];
@@ -506,15 +601,21 @@ class PushController extends Controller
         return $this->render('prod/User/Add.html.twig', $params);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function searchUserAction(Request $request)
     {
         $query = $this->createUserQuery();
-        $query->on_bases_where_i_am($this->getAclForUser($this->getAuthenticatedUser()), [\ACL::CANPUSH]);
+        $query->on_bases_where_i_am($this->getAclForUser($this->getAuthenticatedUser()), [ACL::CANPUSH]);
         $query
-            ->like(\User_Query::LIKE_FIRSTNAME, $request->query->get('query'))
-            ->like(\User_Query::LIKE_LASTNAME, $request->query->get('query'))
-            ->like(\User_Query::LIKE_LOGIN, $request->query->get('query'))
-            ->like_match(\User_Query::LIKE_MATCH_OR);
+            ->like(User_Query::LIKE_FIRSTNAME, $request->query->get('query'))
+            ->like(User_Query::LIKE_LASTNAME, $request->query->get('query'))
+            ->like(User_Query::LIKE_LOGIN, $request->query->get('query'))
+            ->like(User_Query::LIKE_EMAIL, $request->query->get('query'))
+            ->like(User_Query::LIKE_COMPANY, $request->query->get('query'))
+            ->like_match(User_Query::LIKE_MATCH_OR);
 
         $result = $query
             ->include_phantoms()
@@ -541,18 +642,27 @@ class PushController extends Controller
         return $this->app->json($data);
     }
 
+    /**
+     * @param Request $request
+     * @param $list_id
+     * @return Response
+     */
     public function editListAction(Request $request, $list_id)
     {
         $repository = $this->getUserListRepository();
         $list = $repository->findUserListByUserAndId($this->getAuthenticatedUser(), $list_id);
 
         $query = $this->createUserQuery();
-        $query->on_bases_where_i_am($this->getAclForUser($this->getAuthenticatedUser()), [\ACL::CANPUSH]);
+        $query->on_bases_where_i_am($this->getAclForUser($this->getAuthenticatedUser()), [ACL::CANPUSH]);
 
         if ($request->get('query')) {
             $query
                 ->like($request->get('like_field'), $request->get('query'))
-                ->like_match(\User_Query::LIKE_MATCH_OR);
+                ->like_match(User_Query::LIKE_MATCH_OR);
+        }
+
+        if (is_array($request->get('EmailDomain'))) {
+            $query->haveEmailDomains($request->get('EmailDomain'));
         }
         if (is_array($request->get('Activity'))) {
             $query->haveActivities($request->get('Activity'));
@@ -602,6 +712,75 @@ class PushController extends Controller
         );
     }
 
+    /**
+     * update the expiration date of a validation session
+     * also update the expiration of the participants validation tokens
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function updateExpirationAction(Request $request)
+    {
+        // sanity check
+        if (is_null($request->request->get('date'))) {
+            throw new Exception('The provided date is null!');
+        }
+
+        $manager = $this->getEntityManager();
+        $manager->beginTransaction();
+        try {
+            $basket = $this->getBasketRepository()->findUserBasket($request->request->get('basket_id'), $this->app->getAuthenticatedUser(), true);
+            $expirationDate = new DateTime($request->request->get('date') . " 23:59:59");
+            $validation = $basket->getValidation();
+            if (is_null($validation)) {
+                throw new Exception('Unable to find the validation session');
+            }
+
+            // update validation tokens expiration
+            //
+            /** @var ValidationParticipant $participant */
+            foreach($validation->getParticipants() as $participant) {
+                try {
+                    if(!is_null($token = $this->getTokenRepository()->findValidationToken($basket, $participant->getUser()))) {
+                        if($participant->getUser()->getId() === $validation->getInitiator()->getId()) {
+                            // the initiator keeps a no-expiration token
+                            $token->setExpiration(null);    // shoud already be null, but who knows...
+                        }
+                        else {
+                            // the "normal" user token is fixed
+                            $token->setExpiration($expirationDate);
+                        }
+                    }
+                }
+                catch (Exception $e) {
+                    // not unique token ? should not happen.
+                    // no-op
+                }
+            }
+
+            $validation->setExpires($expirationDate);
+            $manager->persist($validation);
+            $manager->flush();
+            $manager->commit();
+            $ret = [
+                'success' => true,
+                'message' => $this->app->trans('Expiration date successfully updated!')
+            ];
+        }
+        catch (Exception $e) {
+            $ret = [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+            $manager->rollback();
+        }
+
+        return $this->app->json($ret);
+    }
+
+
+
     private function formatUser(User $user)
     {
         $subtitle = array_filter([$user->getJob(), $user->getCompany()]);
@@ -638,8 +817,8 @@ class PushController extends Controller
     }
 
     /**
-     * @param array|\record_adapter[] $selection
-     * @return User[]
+     * @param array|record_adapter[] $selection
+     * @return ArrayCollection      Users
      */
     private function getUsersInSelectionExtractor($selection)
     {
@@ -736,4 +915,21 @@ class PushController extends Controller
     {
         return $this->app['random.medium'];
     }
+
+    /**
+     * @return BasketRepository
+     */
+    private function getBasketRepository()
+    {
+        return $this->app['repo.baskets'];
+    }
+
+    /**
+     * @return TokenRepository
+     */
+    private function getTokenRepository()
+    {
+        return $this->app['repo.tokens'];
+    }
+
 }

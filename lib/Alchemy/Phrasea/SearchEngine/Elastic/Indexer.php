@@ -24,7 +24,6 @@ use Psr\Log\NullLogger;
 use Symfony\Component\Stopwatch\Stopwatch;
 use SplObjectStorage;
 
-
 class Indexer
 {
     const THESAURUS = 1;
@@ -107,6 +106,7 @@ class Indexer
                 'settings' => [
                     'number_of_shards'   => $this->index->getOptions()->getShards(),
                     'number_of_replicas' => $this->index->getOptions()->getReplicas(),
+                    'max_result_window'  => $this->index->getOptions()->getMaxResultWindow(),
                     'analysis'           => $this->index->getAnalysis()
                 ],
                 'mappings' => [
@@ -145,7 +145,7 @@ class Indexer
 
     public function updateMapping()
     {
-        $params = [];
+        $params = array();
         $params['index'] = $this->index->getName();
         $params['type'] = RecordIndexer::TYPE_NAME;
         $params['body'][RecordIndexer::TYPE_NAME] = $this->index->getRecordIndex()->getMapping()->export();
@@ -169,8 +169,15 @@ class Indexer
         ]);
     }
 
+    /**
+     * @param string $newIndexName
+     * @param string $newAliasName
+     * @return array
+     */
     public function replaceIndex($newIndexName, $newAliasName)
     {
+        $ret = [];
+
         $oldIndexes = $this->client->indices()->getAlias(
             [
                 'index' => $this->index->getName()
@@ -182,26 +189,47 @@ class Indexer
             foreach($data['aliases'] as $oldAliasName => $data2) {
                 $params['body']['actions'][] = [
                     'remove' => [
+                        'alias' => $oldAliasName,
                         'index' => $oldIndexName,
-                        'alias' => $oldAliasName
                     ]
+                ];
+                $ret[] = [
+                    'action' => "ALIAS_REMOVE",
+                    'msg'    => sprintf('alias "%s" -> "%s" removed', $oldAliasName, $oldIndexName),
+                    'alias'  => $oldAliasName,
+                    'index'  => $oldIndexName,
                 ];
             }
         }
-        //
-        $params['body']['actions'][] = [
-            'remove' => [
-                'index' => $newIndexName,
-                'alias' => $newAliasName
-            ]
-        ];
+
         // create new alias
         $params['body']['actions'][] = [
             'add' => [
+                'alias' => $this->index->getName(),
                 'index' => $newIndexName,
-                'alias' => $this->index->getName()
             ]
         ];
+        $ret[] = [
+            'action' => "ALIAS_ADD",
+            'msg'   => sprintf('alias "%s" -> "%s" added', $this->index->getName(), $newIndexName),
+            'alias' => $this->index->getName(),
+            'index' => $newIndexName,
+        ];
+
+        //
+        $params['body']['actions'][] = [
+            'remove' => [
+                'alias' => $newAliasName,
+                'index' => $newIndexName,
+            ]
+        ];
+        $ret[] = [
+            'action' => "ALIAS_REMOVE",
+            'msg'    => sprintf('alias "%s" -> "%s" removed', $newAliasName, $newIndexName),
+            'alias'  => $newAliasName,
+            'index'  => $newIndexName,
+        ];
+
 
         $this->client->indices()->updateAliases($params);
 
@@ -211,10 +239,17 @@ class Indexer
         ];
         foreach($oldIndexes as $oldIndexName => $data) {
             $params['index'][] = $oldIndexName;
+            $ret[] = [
+                'action' => "INDEX_DELETE",
+                'msg'    => sprintf('index "%s" deleted', $oldIndexName),
+                'index'  => $oldIndexName,
+            ];
         }
         $this->client->indices()->delete(
             $params
         );
+
+        return $ret;
     }
 
     public function populateIndex($what, \databox $databox)
@@ -245,11 +280,11 @@ class Indexer
         );
 
         // Optimize index
-        $this->client->indices()->optimize(
-            [
-                'index' => $this->index->getName()
-            ]
-        );
+//        $this->client->indices()->optimize(
+//            [
+//                'index' => $this->index->getName()
+//            ]
+//        );
 
         $event = $stopwatch->stop('populate');
 
@@ -299,12 +334,9 @@ class Indexer
      */
     public function indexScheduledRecords(\databox $databox)
     {
-        $this->apply(
-            function (BulkOperation $bulk) use ($databox) {
-                $this->recordIndexer->indexScheduled($bulk, $databox);
-            },
-            $this->index
-        );
+        $this->apply(function(BulkOperation $bulk) use($databox) {
+            $this->recordIndexer->indexScheduled($bulk, $databox);
+        }, $this->index);
     }
 
     public function flushQueue()
@@ -317,14 +349,11 @@ class Indexer
             return;
         }
 
-        $this->apply(
-            function (BulkOperation $bulk) {
-                $this->recordIndexer->index($bulk, $this->indexQueue);
-                $this->recordIndexer->delete($bulk, $this->deleteQueue);
-                $bulk->flush();
-            },
-            $this->index
-        );
+        $this->apply(function(BulkOperation $bulk) {
+            $this->recordIndexer->index($bulk, $this->indexQueue);
+            $this->recordIndexer->delete($bulk, $this->deleteQueue);
+            $bulk->flush();
+        }, $this->index);
 
         $this->indexQueue = new SplObjectStorage();
         $this->deleteQueue = new SplObjectStorage();

@@ -10,7 +10,7 @@
     <div id="chart_pie" style="width: 100%; min-width: 250px; max-width: 1000px"></div>
 </div>
 
-  <script type="text/javascript">
+<script type="text/javascript">
     $(document).ready(function() {
 
         var referrersValues = [], statistics = null;
@@ -18,7 +18,9 @@
         if(statistics != null) {
             var arrayViews = [], arrayDownloads = [], arrayReferrers = [];
 
-            var statisticsArrayByDay = _(statistics.by_day).toArray();
+            var statisticsArrayByDay = $.map(statistics.by_day, function(value, index) {
+                return [value];
+            });
             statisticsArrayByDay.map(function(objByDay) {
                 //[new Date(2017, 0, 1), 5],
                 arrayViews.push([new Date(objByDay.label), objByDay.views]);
@@ -27,10 +29,13 @@
 
             //add header for piechart
             arrayReferrers.push(['Links', 'Visualisation']);
-            var statisticsReferrers = _(statistics.referrers).toArray();
+            var statisticsReferrers = $.map(statistics.referrers, function(value, index) {
+                return [value];
+            });
 
             //sort array in descending order - referrers count
-            statisticsReferrers = _.sortBy(statisticsReferrers, "count").reverse();
+            //statisticsReferrers = _.sortBy(statisticsReferrers, "count").reverse();
+            statisticsReferrers.sort(function(a,b) {return a.count - b.count}).reverse()
             statisticsReferrers.map(function(objReferrers) {
                 referrersValues.push(objReferrers.count);
                 arrayReferrers.push([objReferrers.label, objReferrers.count]);
@@ -62,7 +67,16 @@
             }
         }
 
-
+        var $color = "#FFFFFF";
+        if ($('body').hasClass('000000')) {
+            $color = "#FFFFFF";
+        }
+        if ($('body').hasClass('FFFFFF')) {
+            $color = "#000000";
+        }
+        /*if ($('body').hasClass('959595')) {
+            $color = "#000000";
+        }*/
         function drawChartVisualisation() {
             var maxValue = statistics.max_views < 4 ? 4 : statistics.max_views;
             var data = new google.visualization.DataTable();
@@ -71,9 +85,10 @@
 
             data.addRows(arrayViews);
 
+
             var options = {
                 titleTextStyle: {
-                    color: 'white',
+                    color: $color,
                     fontSize: 13
                 },
                 colors: ['#FF9900'],
@@ -82,28 +97,28 @@
                 hAxis: {
                     title: '{{ 'preview::date' | trans }}',
                     titleTextStyle: {
-                        color: 'white',
+                        color: $color,
                         fontSize: 11
                     },
-                    textStyle:{color: '#FFF'},
+                    textStyle:{color: $color},
                     format: 'd/M/yy',
                     gridlines: {color: 'none'},
                     min: new Date(statistics.from),
                     max: new Date(statistics.to),
-                    baselineColor: '#FFF'
+                    baselineColor: $color
                 },
                 vAxis: {
                     title: '{{ 'preview::visualisation' | trans }}',
                     titleTextStyle: {
-                        color: 'white',
+                        color: $color,
                         fontSize: 11
                     },
-                    textStyle:{color: '#FFF'},
+                    textStyle:{color: $color},
                     minValue: 0,
                     maxValue: maxValue,
-                    baselineColor: '#FFF'
+                    baselineColor: $color
                 },
-                legend: {position: 'top', textStyle: {color: 'white'}},
+                legend: {position: 'top', textStyle: {color: $color}},
             };
 
             var chart = new google.visualization.ColumnChart(
@@ -123,7 +138,7 @@
 
             var options = {
                 titleTextStyle: {
-                    color: 'white',
+                    color: $color,
                     fontSize: 13
                 },
                 colors: ['#FF9900'],
@@ -132,29 +147,29 @@
                 hAxis: {
                     title: '{{ 'preview::date' | trans }}',
                     titleTextStyle: {
-                        color: 'white',
+                        color: $color,
                         fontSize: 11
                     },
-                    textStyle:{color: '#FFF'},
+                    textStyle:{color: $color},
                     format: 'd/M/yy',
                     gridlines: {color: 'none'},
                     min: new Date(statistics.from),
                     max: new Date(statistics.to),
-                    baselineColor: '#FFF'
+                    baselineColor: $color
                 },
                 vAxis: {
                     title: '{{ 'preview::downloads' | trans }}',
                     titleTextStyle: {
-                        color: 'white',
+                        color: $color,
                         fontSize: 11
                     },
-                    textStyle:{color: '#FFF'},
+                    textStyle:{color: $color},
                     minValue: 0,
                     maxValue: maxValue,
-                    baselineColor: '#FFF',
+                    baselineColor: $color,
                     format: '0'
                 },
-                legend: {position: 'top', textStyle: {color: 'white'}},
+                legend: {position: 'top', textStyle: {color: $color}},
             };
 
             var chart = new google.visualization.ColumnChart(
@@ -170,7 +185,7 @@
                 'backgroundColor': 'transparent',
                 is3D: true,
                 colors:['#FF9900','#3FDFFD', '#14CAB5', '#CAA514', '#97853C'],
-                legend: {position: 'right', textStyle: {color: 'white'}},
+                legend: {position: 'right', textStyle: {color: $color}},
                 chartArea: {width:'90%',height:'70%'}
             };
 
@@ -194,4 +209,4 @@
     });
 
 
-  </script>
+</script>

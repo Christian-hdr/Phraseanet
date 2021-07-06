@@ -1,0 +1,169 @@
+{% if not reload %}
+
+<h1>{{ 'admin::workermanager:tab:workerinfo: description' |trans }}</h1>
+<div class="worker-info-block">
+<form action="{{ path("worker_admin_truncate") }}" method="POST">
+    <p>
+        <button class="btn btn-primary">
+            {{ 'admin::workermanager:tab:workerinfo: Erase all information' |trans }}
+        </button>
+        <span class="alert alert-danger">
+            {{ "admin::workermanager:tab:workerinfo: Warning! Erase all information" |trans }}
+        </span>
+        </p>
+</form>
+
+<form action="{{ path("worker_admin_delete_finished") }}" method="POST">
+    <p>
+        <button class="btn btn-primary">
+            {{ 'admin::workermanager:tab:workerinfo: Erase all finished' | trans }}
+        </button>
+        <span class="alert alert-info">
+            {{ "admin::workermanager:tab:workerinfo: Warning! Erase all finished"|trans }}
+        </span>
+
+    </p>
+</form>
+<br><br>
+    <button id="refresh-list" class="btn btn-success">
+        {{ 'admin::workermanager:tab:workerinfo: Refresh list' |trans }}
+    </button>
+
+    <div class="controls">
+        <label class="checkbox inline">
+            <input class="running-work refresh-list-checkbox" type="checkbox"  value="1" checked> {{ 'admin::workermanager:tab:workerinfo: Display running work' | trans }}
+        </label>
+        <label class="checkbox inline">
+            <input class="finished-work refresh-list-checkbox" type="checkbox"  value="1" checked> {{ 'admin::workermanager:tab:workerinfo: Display finished work' | trans }}
+        </label>
+        <label class="checkbox inline">
+            <input class="error-work refresh-list-checkbox" type="checkbox"  value="1" checked> {{ 'admin::workermanager:tab:workerinfo: Display error work' | trans }}
+        </label>
+        <label class="checkbox inline">
+            <input class="interrupt-work refresh-list-checkbox" type="checkbox"  value="1" checked> {{ 'admin::workermanager:tab:workerinfo: Display manually interrupt work' | trans }}
+        </label>
+    </div>
+
+</div>
+<table class="admintable">
+    <thead>
+    <tr>
+        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: databox_name' | trans }}</th>
+        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: record_id' | trans }}</th>
+        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: work' | trans }}</th>
+        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: work_on' | trans }}</th>
+{#        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: payload' | trans }}</th>#}
+        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: published' | trans }}</th>
+        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: created' | trans }}</th>
+        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: finished' | trans }}</th>
+        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: duration' | trans }}</th>
+        <th class="sortable">{{ 'admin::workermanager:tab:workerinfo: status' | trans }}</th>
+        <th></th>
+
+    </tr>
+    </thead>
+        <tbody class="work-list">
+{% endif %}
+
+{% for workerRow in workerRunningJob | sort | reverse %}
+    <tr title="{{ workerRow.info }}">
+        <td>
+            {% if workerRow.databoxId %}
+                {{ workerRow.databoxId | sbas_labels(app) }}
+            {% endif %}
+        </td>
+        <td>{{ workerRow.recordId }}</td>
+        <td>{{ workerRow.work }}</td>
+        <td>{{ workerRow.workOn }}</td>
+{#        <td>{{ workerRow.payload| json_encode }}</td>#}
+        <td>{{ workerRow.published|date('Y-m-d H:i:s') }}</td>
+        <td>{{ workerRow.created|date('Y-m-d H:i:s') }}</td>
+        <td>
+            {% if workerRow.finished %}
+                {{ workerRow.finished|date('Y-m-d H:i:s') }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
+        <td>
+            {% set duration = workerRow.finished.diff(workerRow.created) %}
+
+            {% if duration.days %}
+                {{ duration.format("%d days  %H:%I:%S") }}
+            {% else %}
+                {{ duration.format("%H:%I:%S") }}
+            {% endif %}
+        </td>
+        <td>{{ workerRow.status }}</td>
+        <td>
+            {% if workerRow.status == 'running' %}
+                <buton class="btn btn-danger btn-mini change-status-interrupt" data-id="{{ workerRow.id }}">{{ 'admin::workermanager:tab:workerinfo: Manually interrupt' | trans }}</buton>
+            {% endif %}
+        </td>
+    </tr>
+{% endfor %}
+
+{% if not reload %}
+        </tbody>
+    </table>
+
+    <script type="text/javascript">
+        function refreshJobList () {
+            var running  = 1;
+            var finished = 1;
+            var error = 1;
+            var interrupt = 1;
+
+            if (!$(".running-work").is(":checked"))
+            {
+                running = 0;
+            }
+            if (!$(".finished-work").is(":checked"))
+            {
+                finished = 0;
+            }
+            if (!$(".error-work").is(":checked"))
+            {
+                error = 0;
+            }
+            if (!$(".interrupt-work").is(":checked"))
+            {
+                interrupt = 0;
+            }
+
+            $.ajax({
+                type: "GET",
+                url: "/admin/worker-manager/info?reload=1&running="+running+"&finished="+finished+"&error="+error+"&interrupt="+interrupt,
+                success: function (data) {
+                    $(".work-list").empty().html(data);
+                }
+            });
+        }
+        $("#refresh-list").on('click', function () {
+            refreshJobList();
+        });
+        $(".refresh-list-checkbox").on('change', function () {
+            refreshJobList();
+        });
+
+        $(".admintable").on('click', '.change-status-interrupt', function () {
+            var workerId = $(this).attr('data-id');
+
+            $.ajax({
+                type: "POST",
+                dataType: 'json',
+                data: {
+                    status: '{{ constant("\\Alchemy\\Phrasea\\Model\\Entities\\WorkerRunningJob::INTERRUPT") }}'
+                },
+                url: "/admin/worker-manager/"+ workerId +"/change-status",
+                success: function (data) {
+                    refreshJobList();
+                }
+            });
+
+        });
+
+    </script>
+{% endif %}
+
+

@@ -57,6 +57,9 @@ class QueryContext
         return new static($this->options, $this->structure, $this->locales, $this->queryLocale, $fields);
     }
 
+    /**
+     * @return Field[]
+     */
     public function getUnrestrictedFields()
     {
         // TODO Restore search optimization by using "caption_all" field
@@ -74,6 +77,10 @@ class QueryContext
         return $this->filterFields($this->structure->getAllFields());
     }
 
+    /**
+     * @param Field[] $fields
+     * @return Field[]
+     */
     private function filterFields(array $fields)
     {
         if ($this->fields !== null) {
@@ -111,12 +118,37 @@ class QueryContext
      */
     public function localizeField(Field $field)
     {
+        $ret = null;
         $index_field = $field->getIndexField();
 
-        if ($field->getType() === FieldMapping::TYPE_STRING) {
-            return $this->localizeFieldName($index_field);
-        } else {
-            return [$index_field];
+        switch($field->getType()) {
+            case FieldMapping::TYPE_STRING:
+                $ret = $this->localizeFieldName($index_field);
+                break;
+
+            case FieldMapping::TYPE_DATE:
+            case FieldMapping::TYPE_DOUBLE:
+                $ret = [
+                    $index_field . '.light',
+                    $index_field
+                ];
+                break;
+
+            default:
+                $ret = [$index_field];
+                break;
+        }
+
+        return $ret;
+    }
+
+    public function truncationField(Field $field)
+    {
+        if($this->options && $this->options->useTruncation()) {
+            return [sprintf('%s.truncated', $field->getIndexField())];
+        }
+        else {
+            return [];
         }
     }
 

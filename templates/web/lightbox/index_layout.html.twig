@@ -1,5 +1,17 @@
 {% extends "common/index_bootstrap.html.twig" %}
 
+{% block icon %}
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/lightbox/images/favicon.ico">
+{% endblock %}
 {% block extra_content %}
     <div id="DIALOG"></div>
+{% endblock %}
+{% block bodyJavascript %}
+    <script>
+        var lightboxApp = lightboxApplication.bootstrap({
+            lang: '{{ app.locale }}',
+            baseUrl: '{{ app['request'].getUriForPath('/') }}',
+            basePath: '{{ app.request.basePath|e('js') }}'
+        });
+    </script>
 {% endblock %}

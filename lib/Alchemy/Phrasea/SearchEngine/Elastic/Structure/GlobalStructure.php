@@ -3,8 +3,6 @@
 namespace Alchemy\Phrasea\SearchEngine\Elastic\Structure;
 
 use Alchemy\Phrasea\SearchEngine\Elastic\FieldMapping;
-use Alchemy\Phrasea\SearchEngine\Elastic\Mapping;
-use Assert\Assertion;
 use DomainException;
 
 final class GlobalStructure implements Structure
@@ -13,6 +11,11 @@ final class GlobalStructure implements Structure
      * @var Field[]
      */
     private $fields = array();
+
+    /**
+     * @var Field[][]
+     */
+    private $fieldsByDatabox = [];
 
     /**
      * @var Field[]
@@ -30,11 +33,6 @@ final class GlobalStructure implements Structure
     private $private = array();
 
     /**
-     * @var Field[]
-     */
-    private $facets = array();
-
-    /**
      * @var Flag[]
      */
     private $flags = array();
@@ -44,47 +42,6 @@ final class GlobalStructure implements Structure
      */
     private $metadata_tags = array();
 
-    /**
-     * @param \databox[] $databoxes
-     * @return GlobalStructure
-     */
-    public static function createFromDataboxes(array $databoxes)
-    {
-        $fields = [];
-        $flags = [];
-
-        foreach ($databoxes as $databox) {
-            foreach ($databox->get_meta_structure() as $fieldStructure) {
-                $fields[] = Field::createFromLegacyField($fieldStructure);
-            }
-
-            foreach ($databox->getStatusStructure() as $status) {
-                $flags[] = Flag::createFromLegacyStatus($status);
-            }
-        }
-
-        return new self($fields, $flags, MetadataHelper::createTags());
-    }
-
-    /**
-     * @param \databox $databox
-     * @return GlobalStructure
-     */
-    public static function createFromDatabox(\databox $databox)
-    {
-        $fields = [];
-        $flags = [];
-
-        foreach ($databox->get_meta_structure() as $fieldStructure) {
-            $fields[] = Field::createFromLegacyField($fieldStructure);
-        }
-
-        foreach ($databox->getStatusStructure() as $status) {
-            $flags[] = Flag::createFromLegacyStatus($status);
-        }
-
-        return new self($fields, $flags, MetadataHelper::createTags());
-    }
 
     /**
      * GlobalStructure constructor.
@@ -94,9 +51,6 @@ final class GlobalStructure implements Structure
      */
     public function __construct(array $fields = [], array $flags = [], array $metadata_tags = [])
     {
-        Assertion::allIsInstanceOf($fields, Field::class);
-        Assertion::allIsInstanceOf($flags, Flag::class);
-        Assertion::allIsInstanceOf($metadata_tags, Tag::class);
 
         foreach ($fields as $field) {
             $this->add($field);
@@ -113,6 +67,10 @@ final class GlobalStructure implements Structure
 
     public function add(Field $field)
     {
+        // store info for each field, not still merged by databox
+        $this->fieldsByDatabox[$field->get_databox_id()][$field->getName()] = $field;
+
+        // store merged infos (same field name)
         $name = $field->getName();
 
         if (isset($this->fields[$name])) {
@@ -129,9 +87,11 @@ final class GlobalStructure implements Structure
             $this->private[$name] = $field;
         }
 
+        /*
         if ($field->isFacet() && $field->isSearchable()) {
             $this->facets[$name] = $field;
         }
+        */
 
         if ($field->hasConceptInference()) {
             $this->thesaurus_fields[$name] = $field;
@@ -144,6 +104,11 @@ final class GlobalStructure implements Structure
     public function getAllFields()
     {
         return $this->fields;
+    }
+
+    public function getAllFieldsByDatabox($databox_id)
+    {
+        return $this->fieldsByDatabox[$databox_id];
     }
 
     /**
@@ -160,14 +125,6 @@ final class GlobalStructure implements Structure
     public function getPrivateFields()
     {
         return $this->private;
-    }
-
-    /**
-     * @return Field[]
-     */
-    public function getFacetFields()
-    {
-        return $this->facets;
     }
 
     /**

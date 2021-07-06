@@ -16,12 +16,12 @@ class Version
     /**
      * @var string
      */
-    private $number = '4.0.2';
+    private $number = '4.1.3';
 
     /**
      * @var string
      */
-    private $name = 'Abies';
+    private $name = 'Buxus';
 
     /**
      * @return string

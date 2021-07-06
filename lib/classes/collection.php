@@ -597,6 +597,9 @@ class collection implements ThumbnailedElement, cache_cacheableInterface
         $this->getReferenceRepository()->save($this->reference);
         $this->collectionRepositoryRegistry->purgeRegistry();
 
+        // clear the trivial cache of databox->get_collections()
+        $this->get_databox()->clearCache(databox::CACHE_COLLECTIONS);
+
         cache_databox::update($this->app, $this->databox->get_sbas_id(), 'structure');
         
 	    $this->dispatch(CollectionEvents::DISABLED, new DisabledEvent($this));
@@ -613,6 +616,9 @@ class collection implements ThumbnailedElement, cache_cacheableInterface
 
         $this->getReferenceRepository()->save($this->reference);
         $this->collectionRepositoryRegistry->purgeRegistry();
+
+        // clear the trivial cache of databox->get_collections()
+        $this->get_databox()->clearCache(databox::CACHE_COLLECTIONS);
 
         cache_databox::update($this->app, $this->databox->get_sbas_id(), 'structure');
         
@@ -790,6 +796,45 @@ class collection implements ThumbnailedElement, cache_cacheableInterface
         }
 
         return false;
+    }
+
+    /**
+     * matches a email against the auto-register whitelist
+     *
+     * @param string $email
+     * @return null|string  the user-model to apply if the email matches
+     */
+    public function getAutoregisterModel($email)
+    {
+        // try to match against the collection whitelist
+        if($this->isRegistrationEnabled()) {
+            if (($xml = @simplexml_load_string($this->get_prefs())) !== false) {
+                foreach ($xml->xpath('/baseprefs/registration/auto_register/email_whitelist/email') as $element) {
+                    if (preg_match($element['pattern'], $email) === 1) {
+                        return (string)$element['user_model'];
+                    }
+                }
+            }
+        }
+
+        // no match ? try against the databox whitelist
+        return $this->get_databox()->getAutoregisterModel($email);
+    }
+
+    /**
+     * Gets terms of use.
+     *
+     * @return null|string
+     */
+    public function getTermsOfUse()
+    {
+        if (false === $xml = simplexml_load_string($this->get_prefs())) {
+            return null;
+        }
+
+        foreach ($xml->xpath('/baseprefs/cgu') as $sbpcgu) {
+            return $sbpcgu->saveXML();
+        }
     }
 
     public function get_cache_key($option = null)

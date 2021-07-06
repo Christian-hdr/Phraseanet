@@ -13,7 +13,7 @@ namespace Alchemy\Phrasea\Helper\User;
 
 use Alchemy\Phrasea\Application;
 use Alchemy\Phrasea\Application\Helper\NotifierAware;
-use Alchemy\Phrasea\Controller\LazyLocator;
+use Alchemy\Phrasea\Core\LazyLocator;
 use Alchemy\Phrasea\Exception\InvalidArgumentException;
 use Alchemy\Phrasea\Model\Entities\User;
 use Alchemy\Phrasea\Notification\Mail\MailSuccessEmailUpdate;
@@ -73,10 +73,12 @@ class Edit extends \Alchemy\Phrasea\Helper\Helper
     {
         $list = array_keys($this->app->getAclForUser($this->app->getAuthenticatedUser())->get_granted_base([\ACL::CANADMIN]));
 
+        $oldGrantedBaseIds = array_keys($this->app->getAclForUser($user)->get_granted_base());
+
         $this->app->getAclForUser($user)->revoke_access_from_bases($list);
 
         if ($this->app->getAclForUser($user)->is_phantom()) {
-            $this->app['manipulator.user']->delete($user);
+            $this->app['manipulator.user']->delete($user, [$user->getId() => $oldGrantedBaseIds]);
         }
 
         return $this;
@@ -583,8 +585,8 @@ class Edit extends \Alchemy\Phrasea\Helper\Helper
                 $user = $this->app['repo.users']->find($usr_id);
 
                 $this->app->getAclForUser($user)->revoke_access_from_bases($delete)
-                    ->give_access_to_base($create)
-                    ->give_access_to_sbas($create_sbas);
+                    ->give_access_to_sbas($create_sbas)     // give access to sbas before bas
+                    ->give_access_to_base($create);
 
                 foreach ($update as $base_id => $rights) {
                     $this->app->getAclForUser($user)
@@ -656,11 +658,11 @@ class Edit extends \Alchemy\Phrasea\Helper\Helper
         $user->setFirstName($parm['first_name'])
             ->setLastName($parm['last_name'])
             ->setGender((int) $parm['gender'])
-            ->setEmail($parm['email'])
+            ->setEmail(trim($parm['email']))
             ->setAddress($parm['address'])
             ->setZipCode($parm['zip'])
-            ->setActivity($parm['function'])
-            ->setJob($parm['activite'])
+            ->setActivity($parm['activite'])
+            ->setJob($parm['function'])
             ->setCompany($parm['company'])
             ->setPhone($parm['telephone'])
             ->setFax($parm['fax']);
@@ -714,6 +716,8 @@ class Edit extends \Alchemy\Phrasea\Helper\Helper
             $user = $this->app['repo.users']->find($usr_id);
             
             $this->app->getAclForUser($user)->apply_model($template, $base_ids);
+
+            $this->app['manipulator.user']->updateUser($user);
         }
 
         return $this;

@@ -12,6 +12,8 @@ namespace Alchemy\Phrasea\Controller\Thesaurus;
 use Alchemy\Phrasea\Controller\Controller;
 use Alchemy\Phrasea\Model\Entities\Preset;
 use Alchemy\Phrasea\Model\Entities\User;
+use Alchemy\Phrasea\WorkerManager\Event\RecordsWriteMetaEvent;
+use Alchemy\Phrasea\WorkerManager\Event\WorkerEvents;
 use caption_field;
 use caption_Field_Value;
 use databox;
@@ -1257,6 +1259,8 @@ class ThesaurusXmlHttpController extends Controller
 
     public function replaceCandidateJson(Request $request)
     {
+        $tsbas = [];
+
         $ret = [
             'ctermsDeleted'    => [],
             'maxRecsUpdatable' => self::SEARCH_REPLACE_MAXREC,
@@ -1265,48 +1269,163 @@ class ThesaurusXmlHttpController extends Controller
             'msg'              => ''
         ];
 
-        // group ids by base
-        $tsbas = [];
         foreach ($request->get('id') as $id) {
             $id = explode('.', $id);
             $sbas_id = array_shift($id);
-            if (!array_key_exists($sbas_id, $tsbas)) {
-                $tsbas[$sbas_id] = [];
+            if (!array_key_exists('b' . $sbas_id, $tsbas)) {
+                $tsbas['b' . $sbas_id] = [
+                    'sbas_id' => (int) $sbas_id,
+                    'tids'    => [],
+                    'domct'   => null,
+                    'tvals'   => [],
+                    'lid'     => '',
+                    'trids'   => []
+                ];
             }
-            $tsbas[$sbas_id][] = implode('.', $id);
+            $tsbas['b' . $sbas_id]['tids'][] = implode('.', $id);
         }
 
-        // loop on bases
-        foreach ($tsbas as $sbas_id => $sbas) {
+        // first, count the number of records to update
+        foreach ($tsbas as $ksbas => $sbas) {
             try {
-                $databox = $this->findDataboxById($sbas_id);
-                $domct = $databox->get_dom_cterms();
+                $databox = $this->findDataboxById($sbas['sbas_id']);
+                $connbas = $databox->get_connection();
+                $tsbas[$ksbas]['domct'] = $databox->get_dom_cterms();
             } catch (\Exception $e) {
                 continue;
             }
 
-            if (!$domct) {
+            if (!$tsbas[$ksbas]['domct']) {
                 continue;
             }
 
-            $domct_changed = false;
-            $xpathct = new \DOMXPath($domct);
+            $lids = [];
+            $xpathct = new \DOMXPath($tsbas[$ksbas]['domct']);
 
-            foreach ($sbas as $tid) {
+            foreach ($sbas['tids'] as $tid) {
                 $xp = '//te[@id="' . $tid . '"]/sy';
                 $nodes = $xpathct->query($xp);
                 if ($nodes->length == 1) {
                     $sy = $nodes->item(0);
-                    $te = $sy->parentNode;
-                    $ret['ctermsDeleted'][] = $sbas_id . '.' . $te->getAttribute('id');
-                    $te->parentNode->removeChild($te);
-                    $domct_changed = true;
+                    $syid = str_replace('.', 'd', $sy->getAttribute('id')) . 'd';
+                    $lids[] = $syid;
+                    $field = $sy->parentNode->parentNode->getAttribute('field');
+
+                    if (!array_key_exists($field, $tsbas[$ksbas]['tvals'])) {
+                        $tsbas[$ksbas]['tvals'][$field] = [];
+                    }
+                    $tsbas[$ksbas]['tvals'][$field][] = $sy;
                 }
             }
 
-            if ($domct_changed && !$request->get('debug')) {
-                $databox->saveCterms($domct);
+            if (empty($lids)) {
+                // no cterm was found
+                continue;
             }
+            $tsbas[$ksbas]['lid'] = "'" . implode("','", $lids) . "'";
+
+            // count records
+            $sql = 'SELECT DISTINCT record_id AS r'
+                . ' FROM thit WHERE value IN (:lids)'
+                . ' ORDER BY record_id';
+            $stmt = $connbas->prepare($sql);
+            $stmt->execute(['lids' => $lids]);
+            $tsbas[$ksbas]['trids'] = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+            $stmt->closeCursor();
+
+            $ret['nRecsToUpdate'] += count($tsbas[$ksbas]['trids']);
+        }
+
+        if ($ret['nRecsToUpdate'] <= self::SEARCH_REPLACE_MAXREC) {
+            foreach ($tsbas as $sbas) {
+
+                try {
+                    $databox = $this->findDataboxById($sbas['sbas_id']);
+                } catch (\Exception $e) {
+                    continue;
+                }
+
+                // fix caption of records
+                foreach ($sbas['trids'] as $rid) {
+                    try {
+                        $record = $databox->get_record($rid);
+
+                        $metadatask = [];  // datas to keep
+                        $metadatasd = [];  // datas to delete
+
+                        /* @var $field caption_field */
+                        foreach ($record->get_caption()->get_fields(null, true) as $field) {
+                            $meta_struct_id = $field->get_meta_struct_id();
+                            /* @var $v caption_Field_Value */
+                            $fname = $field->get_name();
+                            if (!array_key_exists($fname, $sbas['tvals'])) {
+                                foreach ($field->get_values() as $v) {
+                                    $metadatask[] = [
+                                        'meta_struct_id' => $meta_struct_id,
+                                        'meta_id'        => $v->getId(),
+                                        'value'          => $v->getValue()
+                                    ];
+                                }
+                            } else {
+                                foreach ($field->get_values() as $v) {
+                                    $keep = true;
+                                    $vtxt = $this->getUnicode()->remove_indexer_chars($v->getValue());
+                                    /** @var DOMElement $sy */
+                                    foreach ($sbas['tvals'][$fname] as $sy) {
+                                        if ($sy->getAttribute('w') == $vtxt) {
+                                            $keep = false;
+                                        }
+                                    }
+
+                                    if ($keep) {
+                                        $metadatask[] = [
+                                            'meta_struct_id' => $meta_struct_id,
+                                            'meta_id'        => $v->getId(),
+                                            'value'          => $v->getValue()
+                                        ];
+                                    } else {
+                                        $metadatasd[] = [
+                                            'meta_struct_id' => $meta_struct_id,
+                                            'meta_id'        => $v->getId(),
+                                            'value'          => $request->get('t') ? $request->get('t') : ''
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+
+                        if (count($metadatasd) > 0) {
+                            if (!$request->get('debug')) {
+                                $record->set_metadatas($metadatasd, true);
+                                $ret['nRecsUpdated']++;
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        continue;
+                    }
+                }
+
+                // order to write metas for those records
+                $this->app['dispatcher']->dispatch(WorkerEvents::RECORDS_WRITE_META,
+                    new RecordsWriteMetaEvent($sbas['trids'], $sbas['sbas_id'])
+                );
+
+                foreach ($sbas['tvals'] as $tval) {
+                    foreach ($tval as $sy) {
+                        // remove candidate from cterms
+                        $te = $sy->parentNode;
+                        $te->parentNode->removeChild($te);
+                        $ret['ctermsDeleted'][] = $sbas['sbas_id'] . '.' . $te->getAttribute('id');
+                    }
+                }
+                if (!$request->get('debug')) {
+                    $databox->saveCterms($sbas['domct']);
+                }
+            }
+            $ret['msg'] = $this->app->trans('prod::thesaurusTab:dlg:%number% record(s) updated', ['%number%' => $ret['nRecsUpdated']]);
+        } else {
+            // too many records to update
+            $ret['msg'] = $this->app->trans('prod::thesaurusTab:dlg:too many (%number%) records to update (limit=%maximum%)', ['%number%' => $ret['nRecsToUpdate'], '%maximum%' => self::SEARCH_REPLACE_MAXREC]);
         }
 
         return $this->app->json($ret);
@@ -1314,12 +1433,7 @@ class ThesaurusXmlHttpController extends Controller
 
     public function searchTermJson(Request $request)
     {
-        if (null === $lng = $request->get('lng')) {
-            $data = explode('_', $this->app['locale']);
-            if (count($data) > 0) {
-                $lng = $data[0];
-            }
-        }
+        $lng = $request->get('lng');
 
         $html = '';
         $sbid = (int) $request->get('sbid');
@@ -1334,6 +1448,7 @@ class ThesaurusXmlHttpController extends Controller
                 $dom = $databox->get_dom_thesaurus();
                 $html = "" . '<LI id="TX_P.' . $sbid . '.T" class="expandable">' . "\n";
             }
+
 
             $html .= "\t" . '<div class="hitarea expandable-hitarea"></div>' . "\n";
             $html .= "\t" . '<span>' . \phrasea::sbas_labels($sbid, $this->app) . '</span>' . "\n";
@@ -1368,12 +1483,15 @@ class ThesaurusXmlHttpController extends Controller
                     $t = $this->splitTermAndContext($request->get('t'));
                     $unicode = $this->getUnicode();
                     $q2 = 'starts-with(@w, \'' . \thesaurus::xquery_escape($unicode->remove_indexer_chars($t[0])) . '\')';
-                    if ($t[1])
-                        $q2 .= ' and starts-with(@k, \'' . \thesaurus::xquery_escape(
-                                $unicode->remove_indexer_chars($t[1])) . '\')';
-                    $q2 = '//sy[' . $q2 . ' and @lng=\'' . $lng . '\']';
+                    if ($t[1]) {
+                        $q2 .= ' and starts-with(@k, \'' . \thesaurus::xquery_escape($unicode->remove_indexer_chars($t[1])) . '\')';
+                    }
 
-                    $q .= $q2;
+                    if($lng != null){
+                        $q2 .= ' and @lng=\'' . \thesaurus::xquery_escape($lng) . '\'';
+                    }
+
+                    $q .= ('//sy[' . $q2 . ']');
 
                     $nodes = $xpath->query($q);
 
@@ -1451,8 +1569,8 @@ class ThesaurusXmlHttpController extends Controller
                 if ($field0) {
                     $field0 = 'field="' . $field0 . '"';
                 }
-
                 $html .= $tab . '<UL ' . $field0 . '>' . "\n";
+
                 // dump every ts
                 /** @var DOMElement[] $ts */
                 foreach ($tts as $ts) {
@@ -1478,7 +1596,6 @@ class ThesaurusXmlHttpController extends Controller
                         $html .= $tab . "\t\t" . '<div />' . "\n";
                     }
                     $html .= $tab . "\t\t" . '<span>' . $ts['label'] . '</span>' . "\n";
-
 
                     $this->getHTMLTerm($type, $sbid, $lng, $ts['n'], $html, $depth + 1);
 

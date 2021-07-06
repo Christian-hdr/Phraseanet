@@ -12,7 +12,7 @@
 namespace Alchemy\Phrasea\ControllerProvider\Prod;
 
 use Alchemy\Phrasea\Application as PhraseaApplication;
-use Alchemy\Phrasea\Controller\LazyLocator;
+use Alchemy\Phrasea\Core\LazyLocator;
 use Alchemy\Phrasea\Controller\Prod\LazaretController;
 use Alchemy\Phrasea\ControllerProvider\ControllerProviderTrait;
 use Silex\Application;
@@ -81,6 +81,11 @@ class Lazaret implements ControllerProviderInterface, ServiceProviderInterface
         $controllers->get('/{file_id}/thumbnail/', 'controller.prod.lazaret:thumbnailElement')
             ->assert('file_id', '\d+')
             ->bind('lazaret_thumbnail');
+
+        $controllers->get('/{databox_id}/{record_id}/status', 'controller.prod.lazaret:getDestinationStatus')
+            ->assert('databox_id', '\d+')
+            ->assert('record_id', '\d+')
+            ->bind('lazaret_destination_status');
 
         return $controllers;
     }

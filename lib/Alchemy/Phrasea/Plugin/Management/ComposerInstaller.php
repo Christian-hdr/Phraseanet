@@ -33,7 +33,12 @@ class ComposerInstaller
         $this->composer = $pluginsDirectory . DIRECTORY_SEPARATOR . 'composer.phar';
     }
 
-    public function install($directory, $verbose = false)
+    public function __destruct()
+    {
+        @unlink($this->composer);
+    }
+
+    public function install($directory)
     {
         $process = $this->createProcessBuilder()
             ->setTimeout(null)
@@ -45,17 +50,7 @@ class ComposerInstaller
             ->getProcess();
 
         try {
-            $prefix = PHP_EOL . ' >> ';
-
-            $process->run(function ($type, $bytes) use ($verbose, & $prefix) {
-                if ($verbose && $type == 'err') {
-                    echo $prefix . str_replace(PHP_EOL, PHP_EOL . ' >> ', $bytes);
-
-                    $prefix = '';
-                }
-            });
-
-            echo PHP_EOL;
+            $process->run();
         } catch (ProcessException $e) {
             throw new ComposerInstallException(sprintf('Unable to composer install %s', $directory), $e->getCode(), $e);
         }

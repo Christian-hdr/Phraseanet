@@ -38,6 +38,12 @@ class GeneralFormType extends AbstractType
         $builder->add('analytics', 'text', [
             'label'         => 'Google Analytics identifier',
         ]);
+        $builder->add('matomo-analytics-url', 'text', [
+            'label'         => 'Matomo Analytics url',
+        ]);
+        $builder->add('matomo-analytics-id', 'text', [
+            'label'         => 'Matomo Analytics identifier',
+        ]);
         $builder->add('allow-indexation', 'checkbox', [
             'label'         => 'Allow the website to be indexed by search engines like Google',
         ]);
@@ -54,6 +60,12 @@ class GeneralFormType extends AbstractType
             'label'       => 'Default TTL in seconds of sub-definition url',
             'attr'        => ['min' => -1],
             'constraints' => new GreaterThanOrEqual(['value' => -1]),
+        ]);
+        $builder->add('personalize-logo-choice', new PersonalisationLogoFormType(), [
+            'label' => 'Design of personalization logo section',
+            'attr'  => [
+                'id' => 'personalize-logo-container'
+            ]
         ]);
     }
 
