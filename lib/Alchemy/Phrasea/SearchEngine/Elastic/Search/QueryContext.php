@@ -152,6 +152,16 @@ class QueryContext
         }
     }
 
+    public function truncationField(Field $field)
+    {
+        if($this->options && $this->options->useTruncation()) {
+            return [sprintf('%s.truncated', $field->getIndexField())];
+        }
+        else {
+            return [];
+        }
+    }
+
     private function localizeFieldName($field)
     {
         $fields = array();

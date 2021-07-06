@@ -73,7 +73,8 @@ var dialogModule = (function ($) {
                 confirmExit: false,
                 closeCallback: false,
                 closeButton: false,
-                cancelButton: false
+                cancelButton: false,
+		closeText: "close"
             },
             options = typeof options === 'object' ? options : {},
             width,

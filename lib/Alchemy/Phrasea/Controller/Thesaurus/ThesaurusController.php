@@ -46,6 +46,7 @@ class ThesaurusController extends Controller
 
             /** @var \DOMElement $cfield */
             $cfield = $dom->getElementsByTagName("cfield")->item(0);
+
             if ($cfield) {
                 if ($cfield->getAttribute("delbranch")) {
                     $cfield_t = '*';
@@ -74,7 +75,7 @@ class ThesaurusController extends Controller
             'tgt'          => $request->get('tgt'),
             'cterm_found'  => $cterm_found,
             'term_found'   => $term_found,
-            'cfield'       => $cfield,
+            'cfield'       => $cfield="",
             'nts'          => $nts,
             'fullpath_tgt' => $fullpath_tgt,
             'fullpath_src' => $fullpath_src,

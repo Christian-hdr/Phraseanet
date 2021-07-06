@@ -70,7 +70,7 @@ class MailInfoValidationRequest extends AbstractMailWithLink
     {
         if (0 < $this->duration) {
             if (1 < $this->duration) {
-                return $this->message . "\n\n" . $this->app->trans("You have %quantity% days to validate the selection.", ['%quantity%' => $this->duration]);
+                return $this->message . "\n\n" . $this->app->trans("You have %quantity% days to validate the selection.", ['%quantity%' => $this->duration])."\n Jusqu'au ".date('d-m-Y', strtotime('+'.$this->duration.'days'));
             } else {
                 return $this->message . "\n\n" . $this->app->trans("You have 1 day to validate the selection.");
             }

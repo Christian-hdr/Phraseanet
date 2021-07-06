@@ -79,7 +79,9 @@
             return this.each(function () {
                     $.data(this, "tooltip", settings);
                     // copy tooltip into its own expando and remove the title
-                    this.tooltipText = $(this).attr('title');
+                    //move title to data to be reused later
+                    $.data(this, 'title', $(this).attr('title'));
+                    this.tooltipText = $(this).data('title');
                     this.tooltipSrc = $(this).attr('tooltipsrc');
 
                     this.ajaxLoad = ($.trim(this.tooltipText) === '' && this.tooltipSrc !== '');
@@ -256,7 +258,7 @@
             var shouldResize = $('#' + tooltipId + ' .noToolTipResize').length === 0 ? true : false;
 
             // get image or video original dimensions
-            var recordWidth = 260;
+            var recordWidth = 400;
             var recordHeight = 0;
             var tooltipVerticalOffset = 75;
             var tooltipHorizontalOffset = 35;
@@ -312,7 +314,15 @@
             }
             else {
                 // handle captions
-                var contentHeight = $selector.get(0).offsetHeight;
+                recordWidth = parseInt($selector.find('.popover')[0].style.width || recordWidth, 10);
+                if ($selector.find('popover').length > 0) {
+                    recordWidth =
+                        parseInt(
+                            $selector.find('.popover')[0].style.width,
+                            10
+                        ) || recordWidth;
+                }
+                var contentHeight = $selector.height();
                 shouldResize = false;
                 tooltipVerticalOffset = 13;
                 recordHeight = contentHeight > maxHeightAllowed ? maxHeightAllowed : contentHeight;
@@ -390,6 +400,10 @@
                 var totalViewportWidth = viewportDimensions.x;
                 var totalViewportHeight = viewportDimensions.y;
 
+                //for basket
+                if (!$($this).hasClass('icon-stack') && recordPosition.left < 30) {
+                    leftOffset = $('.insidebloc').width();
+                }
                 var leftAvailableSpace = recordPosition.left + leftOffset;
                 var topAvailableSpace = recordPosition.top + topOffset;
                 var rightAvailableSpace = (totalViewportWidth - leftAvailableSpace - recordWidthOffset) - rightOffset;
@@ -518,7 +532,7 @@
                 }
 
                 resizeProperties['width'] = shouldResize ? Math.round(tooltipWidth) : 'auto';
-                resizeProperties['height'] = shouldResize ? Math.round(tooltipHeight) : 'auto';
+                resizeProperties['height'] = shouldResize ? Math.round(tooltipHeight) : getCaptionHeight();
 
 
                 helper.parent.css(resizeProperties);
@@ -526,6 +540,18 @@
         }
         handle.apply($this, arguments);
         return;
+    }
+
+    function getCaptionHeight() {
+        if($('#tooltip').height() > viewport().y) {
+            $('#tooltip .body').css('height', '100%');
+            $('#tooltip .popover').css('height', '100%');
+            $('#tooltip .popover-inner').css('height', '99%');
+            $('#tooltip .popover-inner .popover-content').css('height', '92%');
+            $('#tooltip .popover-inner .popover-content').css('overflow-y', 'auto');
+            return viewport().y; // 13 = vertical offset
+        }
+        return 'auto';
     }
 
     // delete timeout and show helper
@@ -565,9 +591,11 @@
     }
 
     function fix(event) {
-        if (!settings(this).fixable) {
-            hide(event);
-            return;
+        if(!$(this).hasClass('captionTips') || !event.altKey) {
+            if (!settings(this).fixable) {
+                hide(event);
+                return;
+            }
         }
         event.cancelBubble = true;
         if (event.stopPropagation)

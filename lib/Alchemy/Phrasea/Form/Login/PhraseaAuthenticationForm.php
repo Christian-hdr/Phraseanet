@@ -48,7 +48,7 @@ class PhraseaAuthenticationForm extends AbstractType
 
         if ($this->app['phraseanet.configuration']['session']['idle'] < 1) {
             $builder->add('remember-me', 'checkbox' , [
-                'label'    =>  'Remember me',
+                'label'    =>  'Se souvenir de moi',
                 'mapped'   => false,
                 'required' => false,
                 'attr'     => [

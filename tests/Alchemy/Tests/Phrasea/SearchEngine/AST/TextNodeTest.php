@@ -64,6 +64,21 @@ class TextNodeTest extends \PHPUnit_Framework_TestCase
         }';
 
         $this->assertEquals(json_decode($expected, true), $query);
+
+        $query_context->truncationField($field)->willReturn(['foo.truncation', 'foo.truncation']);
+        $query = $node->buildQuery($query_context->reveal());
+
+        $expected = '{
+            "multi_match": {
+                "fields": ["foo.fr", "foo.en", "foo.truncation", "foo.truncation"],
+                "query": "bar",
+                "type": "cross_fields",
+                "operator": "and",
+                "lenient": true
+            }
+        }';
+
+        $this->assertEquals(json_decode($expected, true), $query);
     }
 
     public function testQueryBuildWithPrivateFields()

@@ -23,13 +23,13 @@ $darkerTextColor: #ffffff;
 $darkerTextHoverColor: #ffffff;
 $popoverColor: #fff;
 
-$darkBackgroundColor: #292929;
+$darkBackgroundColor: #1b242b;
 $darkBorderColor: #303030;
 $darkTextColor: #a6a6a6;
 
-$mediumBackgroundColor: #3b3b3b;
+$mediumBackgroundColor: #12171d;
 $mediumBackgroundHoverColor: #666666;
-$mediumBorderColor: #303030; //#404040; //
+$mediumBorderColor: #12171d; //#404040; //
 $mediumBorderHighlightColor: $darkerBorderColor; //#666666;
 $mediumTextColor: #a1a1a1;
 $mediumTextHoverColor: #eaeaea;
@@ -50,7 +50,7 @@ $bgInverseHoverColor: #fff;
 
 /******* GLOBAL PROD **********************************************************/
 
-$scrollBgColor: #3b3b3b;
+$scrollBgColor: #12171d;
 
 $paginateBorderColor: #3b3b3b;
 $paginateTextColor: #3b3b3b;
@@ -146,7 +146,7 @@ $mainMenuBackgroundColor: $mediumBackgroundColor;
 $mainMenuBottomBorder: 1px solid $mediumBorderColor;
 $mainMenuHeight: 41px;
 $mainMenuMarginBottom: 0;
-$mainMenuLinkColor: #b1b1b1;
+$mainMenuLinkColor: #fff;
 $mainMenuLinkBackgroundHoverColor: transparent;
 $mainMenuLinkHoverColor: $textPrimaryHoverColor;
 @import '../../../../stylesheets/shared/variables';
@@ -160,7 +160,7 @@ $workzoneTabBgActive: #333333;
 $workzoneTabTopBorder: 1px solid #303030;
 $workzoneTabBorderBottom: #303030;
 $workzoneBasketAlertDataBg: #fff190;
-$workzoneBasketAlertDataColor: #1a1a1a;
+$workzoneBasketAlertDataColor: #eeeff4;
 $workzoneToolsLabelColor: #7f7f7f;
 
 /******** PROPOSALS CONFIG ********/

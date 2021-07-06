@@ -11,6 +11,7 @@
 namespace Alchemy\Phrasea\Controller;
 
 use Alchemy\Phrasea\Application;
+use Alchemy\Phrasea\Core\Version;
 use Alchemy\Phrasea\Core\Configuration\StructureTemplate;
 use Alchemy\Phrasea\SearchEngine\Elastic\ElasticsearchOptions;
 use Alchemy\Phrasea\Setup\RequirementCollectionInterface;
@@ -34,6 +35,7 @@ class SetupController extends Controller
             'available_locales'      => Application::getAvailableLanguages(),
             'current_servername'     => $request->getScheme() . '://' . $request->getHttpHost() . '/',
             'requirementsCollection' => $requirementsCollection,
+            'version'                => new Version()
         ]);
     }
 
@@ -64,6 +66,7 @@ class SetupController extends Controller
         $warnings = [];
 
         $requirementsCollection = $this->getRequirementsCollection();
+
         foreach ($requirementsCollection as $requirements) {
             foreach ($requirements->getRequirements() as $requirement) {
                 if (!$requirement->isFulfilled() && !$requirement->isOptional()) {
@@ -128,7 +131,7 @@ class SetupController extends Controller
                 'port'     => $database_port,
                 'user'     => $database_user,
                 'password' => $database_password,
-                'dbname'   => $appbox_name,
+                'dbname'   => $appbox_name
             ];
 
             /** @var Connection $abConn */
